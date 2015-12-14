@@ -4,13 +4,14 @@
 
 using namespace std;
 
-namespace hdf5 {
+namespace h5cpp {
 Object::Object()
 {
 }
 
-Object::Object(hid_t id, string name)
+Object::Object(hid_t id, hid_t parentID, string name)
     : m_id(id)
+    , m_parentID(parentID)
     , m_name(name)
 {
 }
@@ -44,6 +45,7 @@ bool Object::isValid() const
     if(m_id != 0) {
         return true;
     }
+    return false;
 }
 
 Object::Type Object::fromHdf5Type(H5I_type_t hType) {
@@ -98,6 +100,11 @@ H5I_type_t Object::toHdf5Type(Object::Type hType) {
         break;
     }
     return returnedType;
+}
+
+hid_t Object::parentID() const
+{
+    return m_parentID;
 }
 
 }

@@ -5,7 +5,7 @@
 #include <armadillo>
 #include <iostream>
 
-namespace hdf5 {
+namespace h5cpp {
 
 template<typename T>
 hid_t templateToHdf5Type()
@@ -47,11 +47,42 @@ class Dataset : public Object
 {
 public:
     Dataset();
-    Dataset(hid_t id, std::string name);
+    Dataset(hid_t id, hid_t parentID, std::string name);
+
     Dataset(const Object &temp);
-    void operator=(const Object &other);
-    void operator=(const Dataset &other);
+    Dataset& operator=(const Object &other);
+    Dataset& operator=(const Dataset &other);
     virtual ~Dataset();
+
+    template<typename T>
+    Dataset& operator=(const arma::Mat<T> matrix)
+    {
+        if(m_id == 0 && m_parentID) {
+            *this = Dataset::create(m_parentID, m_name, matrix);
+        }
+        return *this;
+    }
+
+    template<typename T>
+    static Dataset create(hid_t parentID, std::string name, arma::Mat<T> data)
+    {
+        hsize_t dims[2];
+        dims[0] = data.n_rows;
+        dims[1] = data.n_cols;
+        hid_t dataspace = H5Screate_simple(2, &dims[0], NULL);
+        hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
+        hid_t datatype = templateToHdf5Type<T>();
+        hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
+                            H5P_DEFAULT, creationParameters, H5P_DEFAULT);
+        if(dataset > 0) {
+            herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
+            if(errors >= 0) {
+                H5Sclose(dataspace);
+                return Dataset(dataset, parentID, name);
+            }
+        };
+        return Dataset(0, 0, name);
+    }
 
     template<typename T>
     operator arma::Mat<T>() const
@@ -78,6 +109,16 @@ private:
     void constructFromOther(const Object &other);
 };
 
+template<typename T>
+inline void Object::operator=(const arma::Mat<T>& matrix)
+{
+    if(isValid()) {
+        Dataset dataset = *this;
+        dataset = matrix;
+    } else if(m_parentID > 0) {
+        Dataset::create(m_parentID, m_name, matrix);
+    }
+}
 
 }
 

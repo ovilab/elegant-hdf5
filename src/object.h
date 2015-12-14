@@ -6,19 +6,25 @@
 #include <armadillo>
 #include <iostream>
 
-namespace hdf5 {
-class Object;
+//#include "dataset.h"
+
+namespace h5cpp {
+//class Object;
 class Dataset;
 }
 
-std::ostream& operator<< (std::ostream &out, const hdf5::Object &object);
+//std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object);
 
-namespace hdf5 {
+namespace h5cpp {
 class Object
 {
 public:
     Object();
-    Object(hid_t id, std::string name);
+    Object(hid_t id, hid_t parentID, std::string name);
+
+    template<typename T>
+    void operator=(const arma::Mat<T>& matrix); // TODO: Consider operator chaining support
+
     virtual ~Object();
 
     enum class Type {
@@ -39,8 +45,8 @@ public:
     operator arma::Mat<T>() const
     {
         if(type() != Type::Dataset) {
-            std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. "
-                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
+            std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+//                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
             return arma::Mat<T>();
         }
         Dataset dataset = *this;
@@ -51,34 +57,37 @@ public:
 
     static Type fromHdf5Type(H5I_type_t hType);
     static H5I_type_t toHdf5Type(Object::Type hType);
+    hid_t parentID() const;
+
 protected:
     hid_t m_id = 0;
+    hid_t m_parentID = 0;
     std::string m_name;
 };
 
 }
 
-inline std::ostream& operator<< (std::ostream &out, const hdf5::Object &object)
+inline std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object)
 {
     std::string typeName = "Unknown";
-    hdf5::Object::Type type = object.type();
+    h5cpp::Object::Type type = object.type();
     switch(type) {
-    case hdf5::Object::Type::File:
+    case h5cpp::Object::Type::File:
         typeName = "File";
         break;
-    case hdf5::Object::Type::Group:
+    case h5cpp::Object::Type::Group:
         typeName = "Group";
         break;
-    case hdf5::Object::Type::Datatype:
+    case h5cpp::Object::Type::Datatype:
         typeName = "Datatype";
         break;
-    case hdf5::Object::Type::Dataspace:
+    case h5cpp::Object::Type::Dataspace:
         typeName = "Dataspace";
         break;
-    case hdf5::Object::Type::Dataset:
+    case h5cpp::Object::Type::Dataset:
         typeName = "Dataset";
         break;
-    case hdf5::Object::Type::Attribute:
+    case h5cpp::Object::Type::Attribute:
         typeName = "Attribute";
         break;
     default:

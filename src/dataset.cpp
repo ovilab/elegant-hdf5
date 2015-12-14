@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace hdf5 {
+namespace h5cpp {
 
 Dataset::Dataset()
     : Object()
@@ -12,25 +12,27 @@ Dataset::Dataset()
 
 }
 
-Dataset::Dataset(hid_t id, string name)
-    : Object(id, name)
+Dataset::Dataset(hid_t id, hid_t parentID, string name)
+    : Object(id, parentID, name)
 {
 }
 
-Dataset::Dataset(const hdf5::Object &other)
+Dataset::Dataset(const h5cpp::Object &other)
     : Object(other)
 {
     constructFromOther(other);
 }
 
-void Dataset::operator=(const Object &other)
+Dataset& Dataset::operator=(const Object &other)
 {
     constructFromOther(other);
+    return *this;
 }
 
-void Dataset::operator=(const Dataset &other)
+Dataset& Dataset::operator=(const Dataset &other)
 {
     constructFromOther(other);
+    return *this;
 }
 
 Dataset::~Dataset()
@@ -43,7 +45,14 @@ Dataset::~Dataset()
 
 void Dataset::constructFromOther(const Object &other)
 {
-    m_id = H5Dopen(other.id(), ".", H5P_DEFAULT);
+    if(other.id() > 0) {
+        m_id = H5Dopen(other.id(), ".", H5P_DEFAULT);
+    } else {
+        cerr << "ERROR: Dataset with name " << other.name() << " doesn't exist." << endl;
+        m_id = other.id();
+    }
+    m_parentID = other.parentID();
+    m_name = other.name();
 }
 
 }

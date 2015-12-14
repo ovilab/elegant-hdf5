@@ -5,28 +5,26 @@
 #include <iostream>
 
 using namespace std;
-using namespace hdf5;
+using namespace h5cpp;
 using namespace arma;
 
 int main()
 {
-    File file("/home/svenni/Dropbox/tmp/new.h5", File::OpenMode::ReadWrite);
+    {
+        File file("new.h5", File::OpenMode::ReadWrite);
+        mat A = ones(2, 5);
+        cout << "Writing:" << endl;
 
-    cout << file["myset"] << endl;
-    arma::mat A = file["myset"];
-    cout << A << endl;
-
-    if(file.contains("nymatrise")) {
-        file["nymatrise"] = A;
-    } else {
-        file.createDataset("nymatrise", A);
+        cout << A << endl;
+        file["mymatrix"] = A;
     }
+    {
+        File file("new.h5", File::OpenMode::ReadOnly);
+        cout << "Reading:" << endl;
 
-    file["nymatrise"] = A;
-
-    file.write("nymatrise", A);
-
-    A = file.read("nymatrise");
+        mat A = file["mymatrix"];
+        cout << A << endl;
+    }
     return 0;
 }
 

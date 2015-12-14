@@ -7,7 +7,7 @@
 
 #include "group.h"
 
-namespace hdf5 {
+namespace h5cpp {
 
 class File : public Group
 {

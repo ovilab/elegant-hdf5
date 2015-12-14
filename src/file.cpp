@@ -5,10 +5,10 @@
 
 using namespace std;
 
-namespace hdf5 {
+namespace h5cpp {
 
 File::File(std::string fileName, File::OpenMode mode)
-    : Group(0, "/")
+    : Group(0, 0, "/")
 {
     int cOpenMode = H5F_ACC_RDONLY;
     switch(mode) {

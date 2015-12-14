@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace hdf5 {
+namespace h5cpp {
 
 Group::Group()
     : Object()
@@ -32,8 +32,8 @@ void Group::operator=(const Group &other)
     constructFromOther(other);
 }
 
-Group::Group(hid_t id, string name)
-    : Object(id, name)
+Group::Group(hid_t id, hid_t parentID, string name)
+    : Object(id, parentID, name)
 {
     //    m_id = H5Gopen(id, name.c_str(), H5P_DEFAULT);
 }
@@ -75,11 +75,10 @@ std::vector<std::string> Group::keys() const
 Object Group::operator[](string key) const
 {
     if(!contains(key)) {
-        cerr << "ERROR: Cannot find object for key " << key << endl;
-        return Object();
+        return Object(0, m_id, key);
     }
     hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
-    return Object(id, key);
+    return Object(id, m_id, key);
 }
 
 std::vector<std::string> split(const std::string &s, char delim)
@@ -132,7 +131,7 @@ Group Group::createGroup(string name)
         createGroup(parentPathName);
     }
     hid_t groupID = H5Gcreate(m_id, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    return Group(groupID, name);
+    return Group(groupID, m_id, name);
 }
 
 bool Group::contains(string name) const
