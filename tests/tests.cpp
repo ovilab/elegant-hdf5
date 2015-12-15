@@ -12,7 +12,7 @@ int main()
 {
     {
         File file("new.h5", File::OpenMode::ReadWrite);
-        mat A = ones(2, 5);
+        mat A = 2*ones(2, 2);
         cout << "Writing:" << endl;
 
         cout << A << endl;
@@ -23,6 +23,21 @@ int main()
         cout << "Reading:" << endl;
 
         mat A = file["mymatrix"];
+        cout << A << endl;
+    }
+    {
+        File file("new.h5", File::OpenMode::ReadWrite);
+        cube A = ones(2, 5, 3);
+        cout << "Writing:" << endl;
+
+        cout << A << endl;
+        file["mycube"] = A;
+    }
+    {
+        File file("new.h5", File::OpenMode::ReadOnly);
+        cout << "Reading:" << endl;
+
+        cube A = file["mycube"];
         cout << A << endl;
     }
     return 0;

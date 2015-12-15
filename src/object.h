@@ -23,7 +23,7 @@ public:
     Object(hid_t id, hid_t parentID, std::string name);
 
     template<typename T>
-    void operator=(const arma::Mat<T>& matrix); // TODO: Consider operator chaining support
+    void operator=(const T& matrix); // TODO: Consider operator chaining support
 
     virtual ~Object();
 
@@ -48,6 +48,18 @@ public:
             std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
 //                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
             return arma::Mat<T>();
+        }
+        Dataset dataset = *this;
+        return dataset;
+    }
+
+    template<typename T>
+    operator arma::Cube<T>() const
+    {
+        if(type() != Type::Dataset) {
+            std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+//                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
+            return arma::Cube<T>();
         }
         Dataset dataset = *this;
         return dataset;
