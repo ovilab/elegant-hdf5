@@ -9,7 +9,7 @@
 namespace h5cpp {
 
 template<typename T>
-hid_t templateToHdf5Type()
+hid_t datatypeFromType()
 {
     hid_t hdf5Datatype = H5T_NATIVE_DOUBLE;
     if (std::is_same<T, char>::value) {
@@ -120,18 +120,18 @@ public:
     }
 
     template<typename T>
-    static void extentsFromArma(const arma::Col<T> &v, hsize_t *extents) {
+    static void extentsFromType(const arma::Col<T> &v, hsize_t *extents) {
         extents[0] = v.n_rows;
     }
 
     template<typename T>
-    static void extentsFromArma(const arma::Mat<T> &v, hsize_t *extents) {
+    static void extentsFromType(const arma::Mat<T> &v, hsize_t *extents) {
         extents[0] = v.n_rows;
         extents[1] = v.n_cols;
     }
 
     template<typename T>
-    static void extentsFromArma(const arma::Cube<T> &v, hsize_t *extents) {
+    static void extentsFromType(const arma::Cube<T> &v, hsize_t *extents) {
         extents[0] = v.n_rows;
         extents[1] = v.n_cols;
         extents[2] = v.n_slices;
@@ -147,7 +147,7 @@ public:
             int currentDimensions = H5Sget_simple_extent_ndims(dataspace);
 
             bool shouldOverwrite = false;
-            int targetDimensions = 0;
+            int targetDimensions = 2;
             if(is_vec<T>::value) {
                 std::cout << "Is vec" << std::endl;
                 targetDimensions = 1;
@@ -178,7 +178,7 @@ public:
                 H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
                 *this = Dataset::create(m_parentID, m_name, data);
             } else {
-                hid_t datatype = templateToHdf5Type<T>();
+                hid_t datatype = datatypeFromType<T>();
                 herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
                 H5Sclose(dataspace);
                 if(errors < 0) {
@@ -186,6 +186,13 @@ public:
                 }
             }
         }
+        return *this;
+    }
+
+    template<typename T, typename U>
+    Dataset& operator=(const arma::Gen<T, U> &data) {
+        T dataReal = data;
+        *this = dataReal;
         return *this;
     }
 
@@ -206,10 +213,10 @@ public:
             return Dataset(0, 0, name);
         }
         hsize_t dims[3];
-        extentsFromArma(data, dims);
+        extentsFromType(data, dims);
         hid_t dataspace = H5Screate_simple(targetDimensions, &dims[0], NULL);
         hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
-        hid_t datatype = templateToHdf5Type<T>();
+        hid_t datatype = datatypeFromType<T>();
         hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
                             H5P_DEFAULT, creationParameters, H5P_DEFAULT);
         if(dataset > 0) {
@@ -220,6 +227,13 @@ public:
             }
         };
         return Dataset(0, 0, name);
+    }
+
+    // TODO: Support other types of rvalues, such as eOP
+    template<typename T, typename U>
+    static Dataset create(hid_t parentID, const std::string &name, const arma::Gen<T, U> &data) {
+        T dataReal = data;
+        return create(parentID, name, dataReal);
     }
 
     template<typename T>
@@ -239,7 +253,7 @@ public:
 
         arma::Mat<T> matrix(extents[0], extents[1]);
 
-        hid_t hdf5Datatype = templateToHdf5Type<T>();
+        hid_t hdf5Datatype = datatypeFromType<T>();
         H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
         return matrix;
     }
@@ -261,7 +275,7 @@ public:
 
         arma::Cube<T> cube(extents[0], extents[1], extents[2]);
 
-        hid_t hdf5Datatype = templateToHdf5Type<T>();
+        hid_t hdf5Datatype = datatypeFromType<T>();
         H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cube[0]);
 
         H5Sclose(dataspace);

@@ -12,11 +12,12 @@ int main()
 {
     {
         File file("new.h5", File::OpenMode::ReadWrite);
-        mat A = 2*ones(2, 2);
+//        mat A = 2*ones(2, 2);
         cout << "Writing:" << endl;
 
-        cout << A << endl;
-        file["mymatrix"] = A;
+//        cout << A << endl;
+        mat A = ones(2, 2);
+        file["mymatrix"] = A; // 2*ones(2, 2);
     }
     {
         File file("new.h5", File::OpenMode::ReadOnly);
