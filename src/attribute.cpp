@@ -1,4 +1,7 @@
 #include "attribute.h"
+
+using namespace std;
+
 namespace h5cpp {
 
 Attribute::Attribute(hid_t parentID, const std::string &name)
@@ -56,11 +59,23 @@ h5cpp::Attribute::operator std::string() const
         return std::string();
     }
 
-    char stuff[attributeInfo.data_size];
+    htri_t variableLength = H5Tis_variable_str(attributeType);
 
-    hid_t atype_mem = H5Tget_native_type(attributeType, H5T_DIR_ASCEND);
-    H5Aread(m_id, atype_mem, stuff);
-    std::string value = stuff;
+    hid_t attributeTypeNative = H5Tget_native_type(attributeType, H5T_DIR_ASCEND);
+    char *stringArray;
+    if(variableLength) {
+        H5Aread(m_id, attributeTypeNative, &stringArray);
+    } else {
+        stringArray = new char[attributeInfo.data_size + 1];
+        H5Aread(m_id, attributeTypeNative, stringArray);
+        stringArray[attributeInfo.data_size] = '\0';
+    }
+    std::string value = stringArray;
+    if(!variableLength) {
+        delete[] stringArray;
+    } else {
+        H5free_memory(stringArray);
+    }
     return value;
 }
 
