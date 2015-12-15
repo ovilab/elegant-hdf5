@@ -12,14 +12,17 @@ SOURCES += \
     dataset.cpp \
     file.cpp \
     group.cpp \
-    object.cpp
+    object.cpp \
+    attribute.cpp
 
 HEADERS += \
     conversions.h \
     dataset.h \
     file.h \
     group.h \
-    object.h
+    object.h \
+    attribute.h \
+    utils.h
 
 DESTDIR = $$h5cpp_builddir/dist/h5cpp
 HEADERS_DESTDIR = $$h5cpp_builddir/dist/include

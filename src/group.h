@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 
+#include "attribute.h"
 #include "dataset.h"
 #include "object.h"
 
@@ -17,7 +18,7 @@ public:
     Group();
     Group(const Object &other);
     void operator=(const Object &other);
-    void operator=(const Group &other);
+    void operator=(const Group &other); // TODO: Consider operator chaining
 
     virtual ~Group();
 
@@ -25,14 +26,15 @@ public:
     Object operator[](std::string key) const;
 
     template<typename T>
-    Dataset createDataset(std::string name, arma::Mat<T> data)
-    {
-        return Dataset::create(m_id, name, data);
-    }
+    Dataset createDataset(std::string name, arma::Mat<T> data);
 
     Group createGroup(std::string name);
 
-    bool contains(std::string name) const;
+    bool hasKey(std::string name) const;
+    std::vector<std::string> attributes() const;
+    Attribute operator ()(std::string key) const;
+    h5cpp::Attribute attribute(std::string key) const;
+    bool hasAttribute(std::string name) const;
 protected:
     Group(hid_t id, hid_t parentID, std::string name);
 
@@ -41,6 +43,12 @@ protected:
 private:
     void constructFromOther(const Object &other);
 };
+
+template<typename T>
+Dataset Group::createDataset(std::string name, arma::Mat<T> data)
+{
+    return Dataset::create(m_id, name, data);
+}
 
 }
 
