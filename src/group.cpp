@@ -47,7 +47,6 @@ void Group::constructFromOther(const Object &other)
 Group::~Group()
 {
     if(m_id != 0) {
-        cout << "Closing group with ID " << m_id << endl;
         H5Gclose(m_id);
         m_id = 0;
     }

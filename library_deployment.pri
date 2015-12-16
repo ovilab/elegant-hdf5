@@ -4,10 +4,12 @@ LIB_NAME = h5cpp
 
 LIB_TARGET = $$qtLibraryTarget($$LIB_NAME)
 LIBS += -L$$h5cpp_builddir/dist/$${LIB_NAME} -l$${LIB_TARGET}
+#LIBS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial
 
 QML_IMPORT_PATH += $$h5cpp_builddir/dist/
 QML2_IMPORT_PATH += $$QML_IMPORT_PATH
 INCLUDEPATH += $$h5cpp_srcdir/src/
+INCLUDEPATH += /usr/include/hdf5/serial
 
 # Deployment of library
 ios {
