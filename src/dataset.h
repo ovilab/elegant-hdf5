@@ -115,10 +115,8 @@ public:
             bool shouldOverwrite = false;
             int targetDimensions = 2;
             if(is_vec<T>::value) {
-                std::cout << "Is vec" << std::endl;
                 targetDimensions = 1;
             } else if(is_mat<T>::value) {
-                std::cout << "Is mat" << std::endl;
                 targetDimensions = 2;
             } else if(is_cube<T>::value) {
                 targetDimensions = 3;
@@ -144,7 +142,7 @@ public:
                 H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
                 *this = Dataset::create(m_parentID, m_name, data);
             } else {
-                hid_t datatype = Utils::datatypeFromType<T>();
+                hid_t datatype = datatypeFromType<T>()();
                 herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
                 H5Sclose(dataspace);
                 if(errors < 0) {
@@ -182,7 +180,7 @@ public:
         extentsFromType(data, dims);
         hid_t dataspace = H5Screate_simple(targetDimensions, &dims[0], NULL);
         hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
-        hid_t datatype = Utils::datatypeFromType<T>();
+        hid_t datatype = datatypeFromType<T>()();
         hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
                             H5P_DEFAULT, creationParameters, H5P_DEFAULT);
         if(dataset > 0) {
@@ -219,7 +217,7 @@ public:
 
         arma::Mat<T> matrix(extents[0], extents[1]);
 
-        hid_t hdf5Datatype = Utils::datatypeFromType<T>();
+        hid_t hdf5Datatype = datatypeFromType<T>()();
         H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
         return matrix;
     }
@@ -241,7 +239,7 @@ public:
 
         arma::Cube<T> cube(extents[0], extents[1], extents[2]);
 
-        hid_t hdf5Datatype = Utils::datatypeFromType<T>();
+        hid_t hdf5Datatype = datatypeFromType<T>()();
         H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cube[0]);
 
         H5Sclose(dataspace);

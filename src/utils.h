@@ -4,74 +4,101 @@
 #include <hdf5.h>
 #include <string>
 #include <type_traits>
+#include <armadillo>
 
 namespace h5cpp {
 
-class Utils
+template<typename T>
+struct datatypeFromType
 {
-public:
-    template<typename T>
-    static hid_t datatypeFromType();
-
+    hid_t operator()(){
+        return 0;
+    }
 };
 
 template<>
-inline hid_t Utils::datatypeFromType<char>()
+struct datatypeFromType<char>
 {
-    return H5T_NATIVE_SCHAR;
-}
+    hid_t operator()(){ return H5T_NATIVE_SCHAR; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<unsigned char>() {
-    return H5T_NATIVE_UCHAR;
-}
+struct datatypeFromType<unsigned char> {
+    hid_t operator()(){ return H5T_NATIVE_UCHAR; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<short>() {
-    return H5T_NATIVE_SHORT;
-}
+struct datatypeFromType<short> {
+    hid_t operator()(){ return H5T_NATIVE_SHORT; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<unsigned short>() {
-    return H5T_NATIVE_USHORT;
-}
+struct datatypeFromType<unsigned short> {
+    hid_t operator()(){ return H5T_NATIVE_USHORT; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<int>() {
-    return H5T_NATIVE_INT;
-}
+struct datatypeFromType<int> {
+    hid_t operator()(){ return H5T_NATIVE_INT; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<unsigned int>() {
-    return H5T_NATIVE_UINT;
-}
+struct datatypeFromType<unsigned int> {
+    hid_t operator()(){ return H5T_NATIVE_UINT; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<long>() {
-    return H5T_NATIVE_LONG;
-}
+struct datatypeFromType<long> {
+    hid_t operator()(){ return H5T_NATIVE_LONG; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<unsigned long>() {
-    return H5T_NATIVE_ULONG;
-}
+struct datatypeFromType<unsigned long> {
+    hid_t operator()(){ return H5T_NATIVE_ULONG; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<long long>() {
-    return H5T_NATIVE_LLONG;
-}
+struct datatypeFromType<long long> {
+    hid_t operator()(){ return H5T_NATIVE_LLONG; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<unsigned long long>() {
-    return H5T_NATIVE_ULLONG;
-}
+struct datatypeFromType<unsigned long long> {
+    hid_t operator()(){ return H5T_NATIVE_ULLONG; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<float>() {
-    return H5T_NATIVE_FLOAT;
-}
+struct datatypeFromType<float> {
+    hid_t operator()(){ return H5T_NATIVE_FLOAT; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<double>() {
-    return H5T_NATIVE_DOUBLE;
-}
+struct datatypeFromType<double> {
+    hid_t operator()(){ return H5T_NATIVE_DOUBLE; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<long double>() {
-    return H5T_NATIVE_LDOUBLE;
-}
+struct datatypeFromType<long double> {
+    hid_t operator()(){ return H5T_NATIVE_LDOUBLE; }
+};
+
 template<>
-inline hid_t Utils::datatypeFromType<bool>() {
-    return H5T_NATIVE_HBOOL;
-}
+struct datatypeFromType<bool> {
+    hid_t operator()(){ return H5T_NATIVE_HBOOL; }
+};
+template<typename T>
+struct datatypeFromType<arma::Col<T>> {
+     hid_t operator()(){ return datatypeFromType<T>()(); }
+};
+template<typename T>
+struct datatypeFromType<arma::Mat<T>> {
+     hid_t operator()(){ return datatypeFromType<T>()(); }
+};
+template<typename T>
+struct datatypeFromType<arma::Cube<T>> {
+     hid_t operator()(){ return datatypeFromType<T>()(); }
+};
+
 }
 
 #endif // UTILS_H

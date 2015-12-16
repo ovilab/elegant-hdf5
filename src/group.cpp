@@ -110,7 +110,6 @@ Attribute Group::operator()(string key) const
 Attribute Group::attribute(string key) const
 {
     if(!hasAttribute(key)) {
-        std::cerr << "ERROR: Couldn't find attribute '" << key << "' in '" << m_name << "'." << std::endl;
         return Attribute(0, m_id, key);
     }
     return Attribute(m_id, key);
