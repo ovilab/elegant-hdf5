@@ -17,6 +17,31 @@ Object::Object(hid_t id, hid_t parentID, string name)
 {
 }
 
+Object::Object(const Object &other)
+    : m_parentID(other.parentID())
+    , m_name(other.name())
+
+{
+    openValidOther(other);
+}
+
+Object &Object::operator=(const Object &other)
+{
+    m_parentID = other.parentID();
+    m_name = other.name();
+    openValidOther(other);
+    return *this;
+}
+
+void Object::openValidOther(const Object &other)
+{
+    if(other.isValid()) {
+        m_id = H5Oopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
+    } else {
+        m_id = other.id();
+    }
+}
+
 Object::~Object()
 {
     if(m_id != 0) {
@@ -43,7 +68,7 @@ hid_t Object::id() const
 
 bool Object::isValid() const
 {
-    if(m_id != 0) {
+    if(m_id != 0 && !m_name.empty() && (m_parentID != 0 || type() == Type::File)) {
         return true;
     }
     return false;

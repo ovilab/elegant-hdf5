@@ -11,6 +11,9 @@
 namespace h5cpp {
 //class Object;
 class Dataset;
+class Group;
+class File;
+class Attribute;
 }
 
 //std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object);
@@ -21,6 +24,13 @@ class Object
 public:
     Object();
     Object(hid_t id, hid_t parentID, std::string name);
+
+    // Dowgrading from other type to object not allowed (closing won't work)
+    Object(const Object &other);
+    Object& operator=(const Object &other);
+
+//    Object(const Dataset& dataset) = delete;
+//    Object(const Group& dataset) = delete;
 
     template<typename T>
     void operator=(const T& matrix); // TODO: Consider operator chaining support
@@ -75,6 +85,9 @@ protected:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
+
+private:
+    void openValidOther(const Object &other);
 };
 
 }
