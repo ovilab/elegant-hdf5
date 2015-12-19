@@ -23,6 +23,9 @@ public:
     virtual ~Group();
 
     std::vector<std::string> keys() const;
+    std::vector<Object> items() const;
+
+    Object item(std::string key) const;
     Object operator[](std::string key) const;
 
     template<typename T>

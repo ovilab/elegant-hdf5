@@ -72,6 +72,24 @@ std::vector<std::string> Group::keys() const
     return returnedKeys;
 }
 
+std::vector<Object> Group::items() const
+{
+    std::vector<Object> returnedItems;
+    for(auto key : keys()) {
+        returnedItems.push_back(item(key));
+    }
+    return returnedItems;
+}
+
+Object Group::item(string key) const
+{
+    if(!hasKey(key)) {
+        return Object(0, m_id, key);
+    }
+    hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
+    return Object(id, m_id, key);
+}
+
 std::vector<std::string> Group::attributes() const
 {
     vector<string> returnedAttributes;
@@ -94,11 +112,7 @@ std::vector<std::string> Group::attributes() const
 
 Object Group::operator[](string key) const
 {
-    if(!hasKey(key)) {
-        return Object(0, m_id, key);
-    }
-    hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
-    return Object(id, m_id, key);
+    return item(key);
 }
 
 Attribute Group::operator()(string key) const
