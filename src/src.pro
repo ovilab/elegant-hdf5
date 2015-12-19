@@ -24,5 +24,5 @@ HEADERS += \
     attribute.h \
     utils.h
 
-DESTDIR = $$h5cpp_builddir/dist/h5cpp
-HEADERS_DESTDIR = $$h5cpp_builddir/dist/include
+#DESTDIR = $$h5cpp_builddir/dist/h5cpp
+#HEADERS_DESTDIR = $$h5cpp_builddir/dist/include
