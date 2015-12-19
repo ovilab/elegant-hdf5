@@ -9,6 +9,9 @@ Attribute::Attribute(hid_t parentID, const std::string &name)
     , m_name(name)
 {
     m_id = H5Aopen(parentID, name.c_str(), H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+    cerr << "Close attribute " << m_id << endl;
+#endif
 }
 
 Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
@@ -21,7 +24,11 @@ Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
 Attribute::~Attribute()
 {
     if(m_id != 0) {
+#ifdef H5CPP_VERBOSE
+        cerr << "Close attribute " << m_id << endl;
+#endif
         H5Aclose(m_id);
+        m_id = 0;
     }
 }
 

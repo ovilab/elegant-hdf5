@@ -25,15 +25,16 @@ public:
     Object();
     Object(hid_t id, hid_t parentID, std::string name);
 
-    // Dowgrading from other type to object not allowed (closing won't work)
-    Object(const Object &other);
+    enum class CopyMode {
+        OpenOnCopy,
+        DontOpenOnCopy
+    };
+
+    Object(const Object &other, CopyMode mode = CopyMode::OpenOnCopy);
     Object& operator=(const Object &other);
 
-//    Object(const Dataset& dataset) = delete;
-//    Object(const Group& dataset) = delete;
-
     template<typename T>
-    void operator=(const T& matrix); // TODO: Consider operator chaining support
+    void operator=(const T& other); // TODO: Consider operator chaining support
 
     virtual ~Object();
 
@@ -52,30 +53,18 @@ public:
     hid_t id() const;
 
     template<typename T>
-    operator arma::Mat<T>() const
-    {
-        if(type() != Type::Dataset) {
-            std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
-//                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
-            return arma::Mat<T>();
-        }
-        Dataset dataset = *this;
-        return dataset;
-    }
+    operator arma::Row<T>() const;
 
     template<typename T>
-    operator arma::Cube<T>() const
-    {
-        if(type() != Type::Dataset) {
-            std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
-//                 << "Returned matrix will be empty. INFO: " << *this << std::endl;
-            return arma::Cube<T>();
-        }
-        Dataset dataset = *this;
-        return dataset;
-    }
+    operator arma::Col<T>() const;
 
-    virtual bool isValid() const;
+    template<typename T>
+    operator arma::Mat<T>() const;
+
+    template<typename T>
+    operator arma::Cube<T>() const;
+
+    bool isValid() const;
 
     static Type fromHdf5Type(H5I_type_t hType);
     static H5I_type_t toHdf5Type(Object::Type hType);
@@ -89,6 +78,50 @@ protected:
 private:
     void openValidOther(const Object &other);
 };
+
+template<typename T>
+Object::operator arma::Row<T>() const
+{
+    if(type() != Type::Dataset) {
+        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        return arma::Mat<T>();
+    }
+    Dataset dataset = *this;
+    return dataset;
+}
+
+template<typename T>
+Object::operator arma::Col<T>() const
+{
+    if(type() != Type::Dataset) {
+        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        return arma::Mat<T>();
+    }
+    Dataset dataset = *this;
+    return dataset;
+}
+
+template<typename T>
+Object::operator arma::Mat<T>() const
+{
+    if(type() != Type::Dataset) {
+        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        return arma::Mat<T>();
+    }
+    Dataset dataset = *this;
+    return dataset;
+}
+
+template<typename T>
+Object::operator arma::Cube<T>() const
+{
+    if(type() != Type::Dataset) {
+        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat." << std::endl;
+        return arma::Cube<T>();
+    }
+    Dataset dataset = *this;
+    return dataset;
+}
 
 }
 

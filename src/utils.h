@@ -87,6 +87,10 @@ struct datatypeFromType<bool> {
     hid_t operator()(){ return H5T_NATIVE_HBOOL; }
 };
 template<typename T>
+struct datatypeFromType<arma::Row<T>> {
+     hid_t operator()(){ return datatypeFromType<T>()(); }
+};
+template<typename T>
 struct datatypeFromType<arma::Col<T>> {
      hid_t operator()(){ return datatypeFromType<T>()(); }
 };

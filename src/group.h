@@ -38,12 +38,10 @@ public:
     Attribute operator ()(std::string key) const;
     h5cpp::Attribute attribute(std::string key) const;
     bool hasAttribute(std::string name) const;
-protected:
-    Group(hid_t id, hid_t parentID, std::string name);
-
-    void setGroupID(hid_t groupID);
 
 private:
+    Group(hid_t id, hid_t parentID, std::string name);
+
     void constructFromOther(const Object &other);
 };
 

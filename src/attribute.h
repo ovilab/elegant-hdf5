@@ -57,6 +57,7 @@ void Attribute::operator=(const T &other)
     dims[0] = 1;
     if(m_id != 0) {
         H5Aclose(m_id);
+        m_id = 0;
         H5Adelete(m_parentID, m_name.c_str());
     }
     hid_t dataspace = H5Screate_simple(1, &dims[0], NULL);

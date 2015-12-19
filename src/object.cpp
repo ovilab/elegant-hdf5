@@ -17,12 +17,13 @@ Object::Object(hid_t id, hid_t parentID, string name)
 {
 }
 
-Object::Object(const Object &other)
+Object::Object(const Object &other, Object::CopyMode mode)
     : m_parentID(other.parentID())
     , m_name(other.name())
-
 {
-    openValidOther(other);
+    if(mode == CopyMode::OpenOnCopy) {
+        openValidOther(other);
+    }
 }
 
 Object &Object::operator=(const Object &other)
@@ -37,15 +38,24 @@ void Object::openValidOther(const Object &other)
 {
     if(other.isValid()) {
         m_id = H5Oopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+        cerr << "Opened other object to " << m_id << endl;
+#endif
     } else {
         m_id = other.id();
+#ifdef H5CPP_VERBOSE
+        cerr << "Copied other " << m_id << endl;
+#endif
     }
 }
 
 Object::~Object()
 {
-    if(m_id != 0) {
+    if(m_id > 0) {
         H5Oclose(m_id);
+#ifdef H5CPP_VERBOSE
+        cerr << "Closing object " << m_id << endl;
+#endif
         m_id = 0;
     }
 }
@@ -68,10 +78,16 @@ hid_t Object::id() const
 
 bool Object::isValid() const
 {
-    if(m_id != 0 && !m_name.empty() && (m_parentID != 0 || type() == Type::File)) {
+    if(type() == Type::File) {
+        if(m_id == 0) {
+            return false;
+        }
         return true;
     }
-    return false;
+    if(m_id == 0 || m_name.empty() || m_parentID == 0) {
+        return false;
+    }
+    return true;
 }
 
 Object::Type Object::fromHdf5Type(H5I_type_t hType) {
