@@ -9,94 +9,94 @@
 namespace h5cpp {
 
 template<typename T>
-struct datatypeFromType
+struct TypeHelper
 {
-    hid_t operator()(){
+    static hid_t hdfType(){
         return 0;
     }
 };
 
 template<>
-struct datatypeFromType<char>
+struct TypeHelper<char>
 {
-    hid_t operator()(){ return H5T_NATIVE_SCHAR; }
+    static hid_t hdfType(){ return H5T_NATIVE_SCHAR; }
 };
 
 template<>
-struct datatypeFromType<unsigned char> {
-    hid_t operator()(){ return H5T_NATIVE_UCHAR; }
+struct TypeHelper<unsigned char> {
+    static hid_t hdfType(){ return H5T_NATIVE_UCHAR; }
 };
 
 template<>
-struct datatypeFromType<short> {
-    hid_t operator()(){ return H5T_NATIVE_SHORT; }
+struct TypeHelper<short> {
+    static hid_t hdfType(){ return H5T_NATIVE_SHORT; }
 };
 
 template<>
-struct datatypeFromType<unsigned short> {
-    hid_t operator()(){ return H5T_NATIVE_USHORT; }
+struct TypeHelper<unsigned short> {
+    static hid_t hdfType(){ return H5T_NATIVE_USHORT; }
 };
 
 template<>
-struct datatypeFromType<int> {
-    hid_t operator()(){ return H5T_NATIVE_INT; }
+struct TypeHelper<int> {
+    static hid_t hdfType(){ return H5T_NATIVE_INT; }
 };
 
 template<>
-struct datatypeFromType<unsigned int> {
-    hid_t operator()(){ return H5T_NATIVE_UINT; }
+struct TypeHelper<unsigned int> {
+    static hid_t hdfType(){ return H5T_NATIVE_UINT; }
 };
 
 template<>
-struct datatypeFromType<long> {
-    hid_t operator()(){ return H5T_NATIVE_LONG; }
+struct TypeHelper<long> {
+    static hid_t hdfType(){ return H5T_NATIVE_LONG; }
 };
 
 template<>
-struct datatypeFromType<unsigned long> {
-    hid_t operator()(){ return H5T_NATIVE_ULONG; }
+struct TypeHelper<unsigned long> {
+    static hid_t hdfType(){ return H5T_NATIVE_ULONG; }
 };
 
 template<>
-struct datatypeFromType<long long> {
-    hid_t operator()(){ return H5T_NATIVE_LLONG; }
+struct TypeHelper<long long> {
+    static hid_t hdfType(){ return H5T_NATIVE_LLONG; }
 };
 
 template<>
-struct datatypeFromType<unsigned long long> {
-    hid_t operator()(){ return H5T_NATIVE_ULLONG; }
+struct TypeHelper<unsigned long long> {
+    static hid_t hdfType(){ return H5T_NATIVE_ULLONG; }
 };
 
 template<>
-struct datatypeFromType<float> {
-    hid_t operator()(){ return H5T_NATIVE_FLOAT; }
+struct TypeHelper<float> {
+    static hid_t hdfType(){ return H5T_NATIVE_FLOAT; }
 };
 
 template<>
-struct datatypeFromType<double> {
-    hid_t operator()(){ return H5T_NATIVE_DOUBLE; }
+struct TypeHelper<double> {
+    static hid_t hdfType(){ return H5T_NATIVE_DOUBLE; }
 };
 
 template<>
-struct datatypeFromType<long double> {
-    hid_t operator()(){ return H5T_NATIVE_LDOUBLE; }
+struct TypeHelper<long double> {
+    static hid_t hdfType(){ return H5T_NATIVE_LDOUBLE; }
 };
 
 template<>
-struct datatypeFromType<bool> {
-    hid_t operator()(){ return H5T_NATIVE_HBOOL; }
+struct TypeHelper<bool> {
+    static hid_t hdfType(){ return H5T_NATIVE_HBOOL; }
 };
 template<typename T>
-struct datatypeFromType<arma::Col<T>> {
-     hid_t operator()(){ return datatypeFromType<T>()(); }
+struct TypeHelper<arma::Col<T>> {
+     static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
 };
 template<typename T>
-struct datatypeFromType<arma::Mat<T>> {
-     hid_t operator()(){ return datatypeFromType<T>()(); }
+struct TypeHelper<arma::Mat<T>> {
+     static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
 };
 template<typename T>
-struct datatypeFromType<arma::Cube<T>> {
-     hid_t operator()(){ return datatypeFromType<T>()(); }
+struct TypeHelper<arma::Cube<T>> {
+     static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
 };
 
 }

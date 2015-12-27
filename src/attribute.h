@@ -43,7 +43,7 @@ Attribute::operator T() const
         std::cerr << "ERROR: Attempted use of undefined attribute '" << m_name << "'." << std::endl;
         return value;
     }
-    hid_t datatype = datatypeFromType<T>()();
+    hid_t datatype = TypeHelper<T>::hdfType();
     H5Aread(m_id, datatype, &value);
     return value;
 }
@@ -52,7 +52,7 @@ Attribute::operator T() const
 template<typename T>
 void Attribute::operator=(const T &other)
 {
-    hid_t datatype = datatypeFromType<T>()();
+    hid_t datatype = TypeHelper<T>::hdfType();
     hsize_t dims[1];
     dims[0] = 1;
     if(m_id != 0) {
