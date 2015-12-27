@@ -18,7 +18,7 @@ Group::Group()
 }
 
 Group::Group(const Object &other)
-    : Object(other)
+    : Object(other, CopyMode::DontOpenOnCopy)
 {
     constructFromOther(other);
 }
@@ -36,18 +36,23 @@ void Group::operator=(const Group &other)
 Group::Group(hid_t id, hid_t parentID, string name)
     : Object(id, parentID, name)
 {
-    //    m_id = H5Gopen(id, name.c_str(), H5P_DEFAULT);
 }
 
 void Group::constructFromOther(const Object &other)
 {
-    m_id = H5Gopen(other.id(), ".", H5P_DEFAULT);
+    m_id = H5Gopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+    cerr << "Open group " << m_id << endl;
+#endif
 }
 
 Group::~Group()
 {
     if(m_id != 0) {
         H5Gclose(m_id);
+#ifdef H5CPP_VERBOSE
+        cerr << "Close group " << m_id << endl;
+#endif
         m_id = 0;
     }
 }
@@ -72,6 +77,27 @@ std::vector<std::string> Group::keys() const
     return returnedKeys;
 }
 
+std::vector<Object> Group::items() const
+{
+    std::vector<Object> returnedItems;
+    for(auto key : keys()) {
+        returnedItems.push_back(item(key));
+    }
+    return returnedItems;
+}
+
+Object Group::item(string key) const
+{
+    if(!hasKey(key)) {
+        return Object(0, m_id, key);
+    }
+    hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+    cerr << "Open object " << id << endl;
+#endif
+    return Object(id, m_id, key);
+}
+
 std::vector<std::string> Group::attributes() const
 {
     vector<string> returnedAttributes;
@@ -94,11 +120,7 @@ std::vector<std::string> Group::attributes() const
 
 Object Group::operator[](string key) const
 {
-    if(!hasKey(key)) {
-        return Object(0, m_id, key);
-    }
-    hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
-    return Object(id, m_id, key);
+    return item(key);
 }
 
 Attribute Group::operator()(string key) const
@@ -164,6 +186,9 @@ Group Group::createGroup(string name)
         createGroup(parentPathName);
     }
     hid_t groupID = H5Gcreate(m_id, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+    cerr << "Created group with id " << groupID << endl;
+#endif
     return Group(groupID, m_id, name);
 }
 
