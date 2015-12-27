@@ -1,6 +1,7 @@
 #include "object.h"
 
 #include "dataset.h"
+#include "group.h"
 #include "utils.h"
 
 using namespace std;
@@ -26,6 +27,28 @@ Object::Object(const Object &other, Object::CopyMode mode)
     }
 }
 
+Object::Object(Object &&other)
+    : m_id(move(other.m_id))
+    , m_parentID(move(other.m_parentID))
+    , m_name(move(other.m_name))
+{
+#ifdef H5CPP_VERBOSE
+    cerr << "Move constructor object " << m_id << endl;
+#endif
+    other.m_id = 0;
+}
+
+Object& Object::operator=(Object &&other)
+{
+    swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
+    m_parentID = move(other.m_parentID);
+    m_name = move(other.m_name);
+#ifdef H5CPP_VERBOSE
+    cerr << "Move assignment object " << m_id << endl;
+#endif
+    return *this;
+}
+
 Object &Object::operator=(const Object &other)
 {
     m_parentID = other.parentID();
@@ -34,12 +57,27 @@ Object &Object::operator=(const Object &other)
     return *this;
 }
 
+Object &Object::operator =(const Dataset &other)
+{
+    const Object& otherObject = other;
+    Object::operator =(otherObject);
+    return *this;
+}
+
+Object &Object::operator =(const Group &other)
+{
+    const Object& otherObject = other;
+    Object::operator =(otherObject);
+    return *this;
+}
+
 void Object::openValidOther(const Object &other)
 {
+    close();
     if(other.isValid()) {
-        m_id = H5Oopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
+        m_id = H5Oopen(other.id(), ".", H5P_DEFAULT);
 #ifdef H5CPP_VERBOSE
-        cerr << "Opened other object to " << m_id << endl;
+        cerr << "Opened other object " << other << " to " << m_id << endl;
 #endif
     } else {
         m_id = other.id();
@@ -49,7 +87,7 @@ void Object::openValidOther(const Object &other)
     }
 }
 
-Object::~Object()
+void Object::close()
 {
     if(m_id > 0) {
         H5Oclose(m_id);
@@ -58,6 +96,11 @@ Object::~Object()
 #endif
         m_id = 0;
     }
+}
+
+Object::~Object()
+{
+    close();
 }
 
 const std::string& Object::name() const

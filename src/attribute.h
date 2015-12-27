@@ -15,6 +15,11 @@ class Attribute
 public:
     Attribute(hid_t parentID, const std::string &name);
     Attribute(hid_t id, hid_t parentID, const std::string &name);
+    Attribute(const Attribute &other);
+    Attribute(Attribute &&other);
+//    Attribute(Attribute &&other) = default;
+    Attribute& operator=(const Attribute &other);
+//    Attribute& operator=(Attribute &&other) = default;
     ~Attribute();
 
     template<typename T>
@@ -33,6 +38,7 @@ private:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
+    void openValidOther(const Attribute &other);
 };
 
 template<typename T>
@@ -44,6 +50,10 @@ Attribute::operator T() const
         return value;
     }
     hid_t datatype = TypeHelper<T>::hdfType();
+    if(datatype < 1) {
+        std::cerr << "ERROR: Unknown conversion of attribute." << std::endl;
+        return value;
+    }
     H5Aread(m_id, datatype, &value);
     return value;
 }
@@ -53,6 +63,10 @@ template<typename T>
 void Attribute::operator=(const T &other)
 {
     hid_t datatype = TypeHelper<T>::hdfType();
+    if(datatype < 1) {
+        std::cerr << "ERROR: Cannot convert unknown type to attribute" << std::endl;
+        return;
+    }
     hsize_t dims[1];
     dims[0] = 1;
     if(m_id != 0) {
@@ -94,7 +108,10 @@ inline std::ostream& operator<< (std::ostream &out, const h5cpp::Attribute &attr
 //    default:
 //        break;
 //    }
-    out << "Attribute(type=" << typeName << ", id=" << attribute.id() << ", name=\"" << attribute.name() << "\")";
+    out << "Attribute(type=" << typeName
+        << ", id=" << attribute.id()
+        << ", name=\"" << attribute.name()
+        << "\", parent=\"" << attribute.parentID() << "\")";
     return out;
 }
 

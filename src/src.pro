@@ -24,4 +24,4 @@ HEADERS += \
     attribute.h \
     utils.h
 
-#DEFINES += H5CPP_VERBOSE
+DEFINES += H5CPP_VERBOSE

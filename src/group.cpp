@@ -17,20 +17,40 @@ Group::Group()
 {
 }
 
+Group::Group(const Group &other)
+    : Object()
+{
+    constructFromOther(other);
+}
+
+Group::Group(Group &&other)
+    : Object(move(other))
+{
+    cerr << "Move constructor group" << endl;
+}
+
 Group::Group(const Object &other)
-    : Object(other, CopyMode::DontOpenOnCopy)
 {
     constructFromOther(other);
 }
 
-void Group::operator=(const Object &other)
+Group& Group::operator=(const Object &other)
 {
     constructFromOther(other);
+    return *this;
 }
 
-void Group::operator=(const Group &other)
+Group& Group::operator=(const Group &other)
 {
     constructFromOther(other);
+    return *this;
+}
+
+Group& Group::operator=(Group &&other)
+{
+    Object &otherObject = other;
+    Object::operator=(move(otherObject));
+    return *this;
 }
 
 Group::Group(hid_t id, hid_t parentID, string name)
@@ -40,13 +60,34 @@ Group::Group(hid_t id, hid_t parentID, string name)
 
 void Group::constructFromOther(const Object &other)
 {
-    m_id = H5Gopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-    cerr << "Open group " << m_id << endl;
-#endif
+    if(other.id() > 0) {
+        H5O_info_t info;
+        herr_t err = H5Oget_info(other.id(), &info);
+        if(err < 0) {
+            cerr << "ERROR: Could not convert object to group. Could not get object info." << endl;
+            return;
+        }
+        if(info.type != H5O_TYPE_GROUP) {
+            cerr << "ERROR: Could not convert object to group. Object is not group. Type info: " << info.type << endl;
+            return;
+        }
+        m_id = H5Gopen(other.id(), ".", H5P_DEFAULT);
+    #ifdef H5CPP_VERBOSE
+        cerr << "Open group from other " << other << " to get " << m_id << endl;
+    #endif
+    } else {
+        m_id = other.id();
+    }
+    m_name = other.name();
+    m_parentID = other.parentID();
 }
 
 Group::~Group()
+{
+    close();
+}
+
+void Group::close()
 {
     if(m_id != 0) {
         H5Gclose(m_id);
@@ -98,7 +139,7 @@ Object Group::item(string key) const
     return Object(id, m_id, key);
 }
 
-std::vector<std::string> Group::attributes() const
+std::vector<std::string> Group::attributeKeys() const
 {
     vector<string> returnedAttributes;
     hsize_t idx = 0;
@@ -204,6 +245,15 @@ bool Group::hasKey(string name) const
         fullPath << "/";
     }
     return true;
+}
+
+std::vector<Attribute> Group::attributes() const
+{
+    std::vector<Attribute> returnedAttributes;
+    for(std::string key : attributeKeys()) {
+        returnedAttributes.emplace_back(attribute(key));
+    }
+    return returnedAttributes;
 }
 
 bool Group::hasAttribute(string name) const

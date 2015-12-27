@@ -8,9 +8,10 @@ Attribute::Attribute(hid_t parentID, const std::string &name)
     : m_parentID(parentID)
     , m_name(name)
 {
+    cerr << "Direct construct attribute" << endl;
     m_id = H5Aopen(parentID, name.c_str(), H5P_DEFAULT);
 #ifdef H5CPP_VERBOSE
-    cerr << "Close attribute " << m_id << endl;
+    cerr << "Open attribute " << m_id << endl;
 #endif
 }
 
@@ -19,6 +20,45 @@ Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
     , m_parentID(parentID)
     , m_name(name)
 {
+#ifdef H5CPP_VERBOSE
+    cerr << "Creating manual attribute on parent " << parentID << " " << name << endl;
+#endif
+}
+
+Attribute::Attribute(Attribute &&other)
+    : m_id(move(other.m_id))
+    , m_parentID(move(other.m_parentID))
+    , m_name(move(other.m_name))
+{
+    other.m_id = 0;
+}
+
+Attribute::Attribute(const Attribute &other)
+{
+    cerr << "Copy construct attribute" << endl;
+    openValidOther(other);
+}
+
+Attribute &Attribute::operator=(const Attribute &other)
+{
+    openValidOther(other);
+    return *this;
+}
+
+void Attribute::openValidOther(const Attribute &other) {
+    m_name = other.name();
+    m_parentID = other.parentID();
+    if(other.id() > 0 && !other.name().empty() && other.parentID() > 0) {
+        m_id = H5Aopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
+#ifdef H5CPP_VERBOSE
+        cerr << "Opening other attribute " << other << " to become " << m_id << endl;
+#endif
+    } else {
+#ifdef H5CPP_VERBOSE
+        cerr << "Copying other attribute " << other << endl;
+#endif
+        m_id = other.id();
+    }
 }
 
 Attribute::~Attribute()

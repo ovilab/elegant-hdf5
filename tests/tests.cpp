@@ -16,7 +16,7 @@ int main()
 {
     {
         File file("myfile.h5", File::OpenMode::Truncate);
-        cerr << file.attributes().size() << endl;
+        cerr << file.attributeKeys().size() << endl;
         cerr << file.items().size() << endl;
     }
     {
@@ -53,6 +53,10 @@ int main()
         cerr << "Cube" << endl;
         cube cu = ones(2, 5, 3);
         file["my_cube"] = cu;
+
+        file.attribute("real_attr") = 123.94;
+        file.attribute("int_attr") = 24;
+//        file.attribute("string_attr") = "lol";
     }
     {
         File file("myfile.h5", File::OpenMode::ReadOnly);
@@ -90,7 +94,7 @@ int main()
     }
     {
         File file("myfile.h5", File::OpenMode::ReadOnly);
-        for(const string &key : file.attributes()) {
+        for(const string &key : file.attributeKeys()) {
             cerr << "Found attribute " << key << endl;
             cerr << file.attribute(key) << endl;
         }
@@ -100,16 +104,20 @@ int main()
         Dataset d;
         d = file["my_stuff"];
         Object e = d;
+        cube A = e;
+        cerr << A << endl;
         Dataset f = e;
         f = ones(2,3);
+
+        cerr << "Dones" << endl;
     }
-//    {
-//        File file("myfile.h5", File::OpenMode::ReadOnly);
-//        for(const Attribute &attribute : file.attributes()) {
-//            cerr << "Found attribute " << attribute.name() << endl;
-//            cerr << attribute << endl;
-//        }
-//    }
+    {
+        File file("myfile.h5", File::OpenMode::ReadOnly);
+        for(const Attribute &attribute : file.attributes()) {
+            cerr << "Found attribute " << attribute.name() << endl;
+            cerr << attribute << endl;
+        }
+    }
     return 0;
 }
 

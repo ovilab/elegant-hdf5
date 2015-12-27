@@ -56,13 +56,24 @@ public:
     Dataset();
     Dataset(hid_t id, hid_t parentID, std::string name);
 
-    Dataset(const Object &temp);
+    Dataset(const Object &other);
+    Dataset(const Dataset &other);
+    Dataset(Dataset &&other);
     Dataset& operator=(const Object &other);
     Dataset& operator=(const Dataset &other);
+    Dataset& operator=(Dataset &&other);
     virtual ~Dataset();
 
     template<typename T>
     bool matchingExtents(const arma::Col<T> &v, hsize_t *extents) {
+        if(v.n_rows == extents[0]) {
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    bool matchingExtents(const arma::Row<T> &v, hsize_t *extents) {
         if(v.n_rows == extents[0]) {
             return true;
         }
@@ -209,7 +220,7 @@ public:
 
         if(dimensionCount != 1) {
             std::cerr << "ERROR: Tried to copy dataspace with "
-                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+                      << dimensionCount << " dimensions to arma::Row." << std::endl;
             return arma::Row<T>();
         }
 
@@ -231,7 +242,7 @@ public:
 
         if(dimensionCount != 1) {
             std::cerr << "ERROR: Tried to copy dataspace with "
-                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+                      << dimensionCount << " dimensions to arma::Col." << std::endl;
             return arma::Mat<T>();
         }
 
@@ -275,7 +286,7 @@ public:
 
         if(dimensionCount != 3) {
             std::cerr << "ERROR: Tried to copy dataspace with "
-                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+                      << dimensionCount << " dimensions to arma::Cube." << std::endl;
             return arma::Cube<T>();
         }
 
@@ -292,6 +303,7 @@ public:
     }
 private:
     void constructFromOther(const Object &other);
+    void close();
 };
 
 template<typename T>

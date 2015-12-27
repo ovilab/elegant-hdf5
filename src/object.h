@@ -31,7 +31,13 @@ public:
     };
 
     Object(const Object &other, CopyMode mode = CopyMode::OpenOnCopy);
+    Object(Object &&other);
+//    Object(Dataset &&other) = delete;
+//    Object(Group &&other) = delete;
     Object& operator=(const Object &other);
+    Object& operator=(const Dataset &other);
+    Object& operator=(const Group &other);
+    Object& operator=(Object &&other);
 
     template<typename T>
     void operator=(const T& other); // TODO: Consider operator chaining support
@@ -77,6 +83,7 @@ protected:
 
 private:
     void openValidOther(const Object &other);
+    void close();
 };
 
 template<typename T>
