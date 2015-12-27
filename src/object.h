@@ -83,7 +83,7 @@ protected:
 
 private:
     void openValidOther(const Object &other);
-    void close();
+    virtual void close();
 };
 
 template<typename T>

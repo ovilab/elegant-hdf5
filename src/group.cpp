@@ -84,7 +84,6 @@ void Group::constructFromOther(const Object &other)
 
 Group::~Group()
 {
-    close();
 }
 
 void Group::close()

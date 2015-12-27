@@ -303,7 +303,7 @@ public:
     }
 private:
     void constructFromOther(const Object &other);
-    void close();
+    virtual void close() override;
 };
 
 template<typename T>

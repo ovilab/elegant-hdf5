@@ -47,7 +47,7 @@ private:
     Group(hid_t id, hid_t parentID, std::string name);
 
     void constructFromOther(const Object &other);
-    void close();
+    virtual void close() override;
 };
 
 template<typename T>
