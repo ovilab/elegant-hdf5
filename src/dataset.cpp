@@ -16,6 +16,11 @@ Dataset::Dataset(Dataset &&other)
 {
 }
 
+Dataset::~Dataset()
+{
+    close();
+}
+
 Dataset::Dataset(hid_t id, hid_t parentID, string name)
     : Object(id, parentID, name)
 {
@@ -51,11 +56,6 @@ Dataset& Dataset::operator=(Dataset &&other)
     return *this;
 }
 
-Dataset::~Dataset()
-{
-    close();
-}
-
 void Dataset::constructFromOther(const Object &other)
 {
     close();
@@ -87,10 +87,10 @@ void Dataset::constructFromOther(const Object &other)
 void Dataset::close()
 {
     if(m_id > 0) {
-        H5Dclose(m_id);
 #ifdef H5CPP_VERBOSE
-        cerr << "Close dataset " << m_id << endl;
+    cerr << "Closing dataset " << m_id << endl;
 #endif
+        H5Dclose(m_id);
         m_id = 0;
     }
 }

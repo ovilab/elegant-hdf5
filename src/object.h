@@ -82,8 +82,8 @@ protected:
     std::string m_name;
 
 private:
-    void openValidOther(const Object &other);
-    virtual void close();
+    void constructFromOther(const Object &other);
+    void close();
 };
 
 template<typename T>

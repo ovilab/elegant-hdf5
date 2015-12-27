@@ -26,7 +26,14 @@ Group::Group(const Group &other)
 Group::Group(Group &&other)
     : Object(move(other))
 {
+#ifdef H5CPP_VERBOSE
     cerr << "Move constructor group" << endl;
+#endif
+}
+
+Group::~Group()
+{
+    close();
 }
 
 Group::Group(const Object &other)
@@ -80,10 +87,6 @@ void Group::constructFromOther(const Object &other)
     }
     m_name = other.name();
     m_parentID = other.parentID();
-}
-
-Group::~Group()
-{
 }
 
 void Group::close()

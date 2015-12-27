@@ -100,6 +100,7 @@ int main()
         }
     }
     {
+        cerr << "Starting my stuff" << endl;
         File file("myfile.h5", File::OpenMode::ReadWrite);
         Dataset d;
         d = file["my_stuff"];

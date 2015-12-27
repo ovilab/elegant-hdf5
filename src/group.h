@@ -19,11 +19,12 @@ public:
     Group(const Object &other);
     Group(const Group &other);
     Group(Group &&other);
+
+    ~Group();
+
     Group& operator=(const Object &other);
     Group& operator=(const Group &other);
     Group& operator=(Group &&other);
-
-    virtual ~Group();
 
     std::vector<std::string> keys() const;
     std::vector<Object> items() const;
@@ -47,7 +48,7 @@ private:
     Group(hid_t id, hid_t parentID, std::string name);
 
     void constructFromOther(const Object &other);
-    virtual void close() override;
+    void close();
 };
 
 template<typename T>

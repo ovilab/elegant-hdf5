@@ -23,7 +23,7 @@ Object::Object(const Object &other, Object::CopyMode mode)
     , m_name(other.name())
 {
     if(mode == CopyMode::OpenOnCopy) {
-        openValidOther(other);
+        constructFromOther(other);
     }
 }
 
@@ -40,12 +40,12 @@ Object::Object(Object &&other)
 
 Object& Object::operator=(Object &&other)
 {
+#ifdef H5CPP_VERBOSE
+    cerr << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")" << endl;
+#endif
     swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
     m_parentID = move(other.m_parentID);
     m_name = move(other.m_name);
-#ifdef H5CPP_VERBOSE
-    cerr << "Move assignment object " << m_id << endl;
-#endif
     return *this;
 }
 
@@ -53,7 +53,7 @@ Object &Object::operator=(const Object &other)
 {
     m_parentID = other.parentID();
     m_name = other.name();
-    openValidOther(other);
+    constructFromOther(other);
     return *this;
 }
 
@@ -71,7 +71,7 @@ Object &Object::operator =(const Group &other)
     return *this;
 }
 
-void Object::openValidOther(const Object &other)
+void Object::constructFromOther(const Object &other)
 {
     close();
     if(other.isValid()) {

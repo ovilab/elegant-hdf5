@@ -59,10 +59,12 @@ public:
     Dataset(const Object &other);
     Dataset(const Dataset &other);
     Dataset(Dataset &&other);
+
+    ~Dataset();
+
     Dataset& operator=(const Object &other);
     Dataset& operator=(const Dataset &other);
     Dataset& operator=(Dataset &&other);
-    virtual ~Dataset();
 
     template<typename T>
     bool matchingExtents(const arma::Col<T> &v, hsize_t *extents) {
@@ -117,7 +119,9 @@ public:
     template<typename T>
     Dataset& operator=(const T &data)
     {
-        if(m_id == 0 && m_parentID) {
+        std::cerr << "Dataset assignment operator of T" << std::endl;
+        std::cerr << "Is valid: " << isValid() << std::endl;
+        if(m_id == 0 && m_parentID > 0) {
             *this = Dataset::create(m_parentID, m_name, data);
         } else {
             int targetDimensions = 2;
@@ -128,7 +132,7 @@ public:
             } else if(is_cube<T>::value) {
                 targetDimensions = 3;
             } else {
-                std::cerr << "Could not determine dimensions of object." << std::endl;
+                std::cerr << "ERROR: Could not determine dimensions of object." << std::endl;
                 return *this;
             }
             hid_t dataspace = H5Dget_space(m_id);
@@ -143,17 +147,18 @@ public:
             }
 
             if(shouldOverwrite) {
-#ifdef H5CPP_VERBOSE
-                    std::cerr << "WARNING: Writing over dataset of shape (" << extents[0] << ", " << extents[1] << ") "
-                              << "with matrix of shape (" << data.n_rows << ", " << data.n_cols << "). "
-                              << "A new dataset will be created and "
-                              << "limitations in HDF5 makes it impossible to free the old dataset." << std::endl;
-#endif
+                //#ifdef H5CPP_VERBOSE
+                std::cerr << "WARNING: Writing over dataset of shape (" << extents[0] << ", " << extents[1] << ") "
+                          << "with matrix of shape (" << data.n_rows << ", " << data.n_cols << "). "
+                          << "Limitations in HDF5 standard makes it impossible to free space taken "
+                          << "up by the old dataset." << std::endl;
+                //#endif
                 H5Sclose(dataspace);
-                H5Dclose(m_id);
+                close();
                 H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
                 *this = Dataset::create(m_parentID, m_name, data);
             } else {
+                std::cerr << "Writing to old dataset" << std::endl;
                 hid_t datatype = TypeHelper<T>::hdfType();
                 herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
                 H5Sclose(dataspace);
@@ -192,7 +197,7 @@ public:
         hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
         hid_t datatype = TypeHelper<T>::hdfType();
         hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
-                            H5P_DEFAULT, creationParameters, H5P_DEFAULT);
+                                  H5P_DEFAULT, creationParameters, H5P_DEFAULT);
         if(dataset > 0) {
             herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
             if(errors >= 0) {
@@ -303,12 +308,14 @@ public:
     }
 private:
     void constructFromOther(const Object &other);
-    virtual void close() override;
+    void close();
 };
 
 template<typename T>
 inline void Object::operator=(const T& matrix)
 {
+    std::cerr << "Assignment operator of T" << std::endl;
+    std::cerr << "Is valid: " << isValid() << std::endl;
     if(isValid()) {
         Dataset dataset = *this;
         dataset = matrix;
