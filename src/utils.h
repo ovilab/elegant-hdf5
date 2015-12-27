@@ -91,6 +91,10 @@ struct TypeHelper<arma::Col<T>> {
      static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
 };
 template<typename T>
+struct TypeHelper<arma::Row<T>> {
+     static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
+};
+template<typename T>
 struct TypeHelper<arma::Mat<T>> {
      static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
 };
@@ -102,4 +106,3 @@ struct TypeHelper<arma::Cube<T>> {
 }
 
 #endif // UTILS_H
-

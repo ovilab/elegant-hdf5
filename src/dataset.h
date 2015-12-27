@@ -109,10 +109,6 @@ public:
         if(m_id == 0 && m_parentID) {
             *this = Dataset::create(m_parentID, m_name, data);
         } else {
-            hid_t dataspace = H5Dget_space(m_id);
-            int currentDimensions = H5Sget_simple_extent_ndims(dataspace);
-
-            bool shouldOverwrite = false;
             int targetDimensions = 2;
             if(is_vec<T>::value) {
                 targetDimensions = 1;
@@ -124,19 +120,24 @@ public:
                 std::cerr << "Could not determine dimensions of object." << std::endl;
                 return *this;
             }
+            hid_t dataspace = H5Dget_space(m_id);
+            int currentDimensions = H5Sget_simple_extent_ndims(dataspace);
 
             hsize_t extents[3];
             H5Sget_simple_extent_dims(dataspace, extents, NULL);
 
+            bool shouldOverwrite = false;
             if(currentDimensions != targetDimensions || !matchingExtents(data, extents)) {
                 shouldOverwrite = true;
             }
 
             if(shouldOverwrite) {
-                std::cout << "WARNING: Writing over dataset of shape (" << extents[0] << ", " << extents[1] << ") "
-                          << "with matrix of shape (" << data.n_rows << ", " << data.n_cols << "). "
-                          << "A new dataset will be created and "
-                          << "limitations in HDF5 makes it impossible to free the old dataset." << std::endl;
+#ifdef H5CPP_VERBOSE
+                    std::cerr << "WARNING: Writing over dataset of shape (" << extents[0] << ", " << extents[1] << ") "
+                              << "with matrix of shape (" << data.n_rows << ", " << data.n_cols << "). "
+                              << "A new dataset will be created and "
+                              << "limitations in HDF5 makes it impossible to free the old dataset." << std::endl;
+#endif
                 H5Sclose(dataspace);
                 H5Dclose(m_id);
                 H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
@@ -164,16 +165,14 @@ public:
     static Dataset create(hid_t parentID, const std::string &name, const T &data)
     {
         int targetDimensions = 0;
-        if(is_vec<T>::value) {
-            std::cout << "Is vec" << std::endl;
+        if(arma::is_Col<T>::value || arma::is_Row<T>::value) {
             targetDimensions = 1;
-        } else if(is_mat<T>::value) {
-            std::cout << "Is mat" << std::endl;
+        } else if(arma::is_Mat<T>::value) {
             targetDimensions = 2;
-        } else if(is_cube<T>::value) {
+        } else if(arma::is_Cube<T>::value) {
             targetDimensions = 3;
         } else {
-            std::cerr << "Could not determine dimensions of object." << std::endl;
+            std::cerr << "ERROR: Could not determine dimensions of object." << std::endl;
             return Dataset(0, 0, name);
         }
         hsize_t dims[3];
@@ -187,6 +186,7 @@ public:
             herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0]);
             if(errors >= 0) {
                 H5Sclose(dataspace);
+                std::cerr << "Returning the created dataset " << dataset << std::endl;
                 return Dataset(dataset, parentID, name);
             }
         };
@@ -198,6 +198,51 @@ public:
     static Dataset create(hid_t parentID, const std::string &name, const arma::Gen<T, U> &data) {
         T dataReal = data;
         return create(parentID, name, dataReal);
+    }
+
+    template<typename T>
+    operator arma::Row<T>() const
+    {
+        std::cerr << "Making a row" << std::endl;
+        hid_t dataspace = H5Dget_space(m_id);
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+
+        if(dimensionCount != 1) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+            return arma::Row<T>();
+        }
+
+        hsize_t extents[dimensionCount];
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
+
+        arma::Row<T> matrix(extents[0]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
+        return matrix;
+    }
+
+    template<typename T>
+    operator arma::Col<T>() const
+    {
+        hid_t dataspace = H5Dget_space(m_id);
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+
+        if(dimensionCount != 1) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+            return arma::Mat<T>();
+        }
+
+        hsize_t extents[dimensionCount];
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
+
+        arma::Col<T> matrix(extents[0]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
+        return matrix;
     }
 
     template<typename T>

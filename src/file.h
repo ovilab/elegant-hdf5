@@ -18,8 +18,10 @@ public:
         Truncate
     };
 
-    File(std::string fileName, File::OpenMode mode);
+    File(std::string fileName, File::OpenMode mode = File::OpenMode::ReadWrite);
     virtual ~File();
+
+    void close();
 };
 
 }

@@ -7,7 +7,10 @@ INCLUDEPATH += /usr/include/hdf5/serial
 LIBS += -lhdf5_cpp -lhdf5_serial
 LIBS += -L../src/ -lh5cpp
 
-include(../library_deployment.pri)
+#include(../library_deployment.pri)
+
+INCLUDEPATH += ../src
+LIBS += -lh5cpp -L../src
 
 SOURCES += \
     tests.cpp
