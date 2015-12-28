@@ -104,7 +104,6 @@ int main()
             cerr << "Found key " << key << endl;
             cerr << file[key] << endl;
         }
-        cerr << "=======" << endl;
     }
     cerr << "=======" << endl;
     {
@@ -113,7 +112,6 @@ int main()
             cerr << "Found attribute " << key << endl;
             cerr << file.attribute(key) << endl;
         }
-        cerr << "=======" << endl;
     }
     cerr << "=======" << endl;
     {
@@ -132,8 +130,6 @@ int main()
         cerr << "Assignment 2" << endl;
         Dataset f = e;
         f = ones(2,3);
-
-        cerr << "Dones" << endl;
     }
     cerr << "=======" << endl;
     {
@@ -142,7 +138,6 @@ int main()
             cerr << "Found attribute " << attribute.name() << endl;
             cerr << attribute << endl;
         }
-        cerr << "=======" << endl;
     }
     cerr << "=======" << endl;
     {
@@ -169,6 +164,9 @@ int main()
         g["fest"] = g["test"];
         file["groupx"] = g;
         file["groupz"] = file["groupy"];
+
+        Dataset d = file["my_mat1"];
+        d = file["groupy"];
     }
     cerr << "=======" << endl;
     return 0;

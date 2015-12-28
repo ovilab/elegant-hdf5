@@ -80,13 +80,14 @@ public:
     hid_t parentID() const;
 
 protected:
+    void constructFromOther(const Object &other);
+    void close();
+
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
 
 private:
-    void constructFromOther(const Object &other);
-    void close();
 };
 
 template<typename T>

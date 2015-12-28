@@ -23,13 +23,13 @@ Group::Group(const Group &other)
     constructFromOther(other);
 }
 
-Group::Group(Group &&other)
-    : Object(move(other))
-{
-#ifdef H5CPP_VERBOSE
-    cerr << "Move constructor group" << endl;
-#endif
-}
+//Group::Group(Group &&other)
+//    : Object(move(other))
+//{
+//#ifdef H5CPP_VERBOSE
+//    cerr << "Move constructor group" << endl;
+//#endif
+//}
 
 Group::~Group()
 {
@@ -43,61 +43,26 @@ Group::Group(const Object &other)
 
 Group& Group::operator=(const Object &other)
 {
-    constructFromOther(other);
+    Object::operator =(other);
     return *this;
 }
 
 Group& Group::operator=(const Group &other)
 {
-    constructFromOther(other);
+    Object::operator =(other);
     return *this;
 }
 
-Group& Group::operator=(Group &&other)
-{
-    Object &otherObject = other;
-    Object::operator=(move(otherObject));
-    return *this;
-}
+//Group& Group::operator=(Group &&other)
+//{
+//    Object &otherObject = other;
+//    Object::operator=(move(otherObject));
+//    return *this;
+//}
 
 Group::Group(hid_t id, hid_t parentID, string name)
     : Object(id, parentID, name)
 {
-}
-
-void Group::constructFromOther(const Object &other)
-{
-    if(other.id() > 0) {
-        H5O_info_t info;
-        herr_t err = H5Oget_info(other.id(), &info);
-        if(err < 0) {
-            cerr << "ERROR: Could not convert object to group. Could not get object info." << endl;
-            return;
-        }
-        if(info.type != H5O_TYPE_GROUP) {
-            cerr << "ERROR: Could not convert object to group. Object is not group. Type info: " << info.type << endl;
-            return;
-        }
-        m_id = H5Gopen(other.id(), ".", H5P_DEFAULT);
-    #ifdef H5CPP_VERBOSE
-        cerr << "Open group from other " << other << " to get " << m_id << endl;
-    #endif
-    } else {
-        m_id = other.id();
-    }
-    m_name = other.name();
-    m_parentID = other.parentID();
-}
-
-void Group::close()
-{
-    if(m_id != 0) {
-        H5Gclose(m_id);
-#ifdef H5CPP_VERBOSE
-        cerr << "Close group " << m_id << endl;
-#endif
-        m_id = 0;
-    }
 }
 
 std::vector<std::string> Group::keys() const

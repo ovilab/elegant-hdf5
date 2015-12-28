@@ -60,7 +60,7 @@ Object &Object::operator=(const Object &other)
 {
     bool copyFromExistingToExisting = isValid() && other.isValid();
     bool copyFromExistingToNonExisting = isNonExistingNamed() && other.isValid();
-    if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
+    if(m_name != other.name() && (copyFromExistingToExisting || copyFromExistingToNonExisting)) {
         close();
         if(copyFromExistingToExisting) {
             H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
@@ -70,8 +70,6 @@ Object &Object::operator=(const Object &other)
         m_id = H5Oopen(m_parentID, m_name.c_str(), H5P_DEFAULT);
         return *this;
     }
-    m_parentID = other.parentID();
-    m_name = other.name();
     constructFromOther(other);
     return *this;
 }
@@ -104,6 +102,8 @@ void Object::constructFromOther(const Object &other)
         cerr << "Copied other " << m_id << endl;
 #endif
     }
+    m_name = other.name();
+    m_parentID = other.parentID();
 }
 
 void Object::close()
@@ -129,6 +129,9 @@ const std::string& Object::name() const
 
 Object::Type Object::type() const
 {
+    if(m_id < 1) {
+        return Type::Invalid;
+    }
     H5I_type_t hType = H5Iget_type(m_id);
     return Object::fromHdf5Type(hType);
 }
@@ -154,12 +157,12 @@ bool Object::isValid() const
 
 bool Object::isDataset() const
 {
-    return (type() == Type::Dataset);
+    return (isValid() && type() == Type::Dataset);
 }
 
 bool Object::isGroup() const
 {
-    return (type() == Type::Group);
+    return (isValid() && type() == Type::Group);
 }
 
 bool Object::isNonExistingNamed() const

@@ -171,6 +171,7 @@ public:
         return *this;
     }
 
+    // TODO Support other arma temporaries, like eOp
     template<typename T, typename U>
     Dataset& operator=(const arma::Gen<T, U> &data) {
         T dataReal = data;
@@ -308,8 +309,8 @@ public:
         return cube;
     }
 private:
-    void constructFromOther(const Object &other);
-    void close();
+//    void constructFromOther(const Object &other);
+//    void close();
 };
 
 template<typename T>
