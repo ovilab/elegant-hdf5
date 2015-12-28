@@ -13,18 +13,22 @@ namespace h5cpp {
 class Attribute
 {
 public:
+    Attribute();
     Attribute(hid_t parentID, const std::string &name);
     Attribute(hid_t id, hid_t parentID, const std::string &name);
     Attribute(const Attribute &other);
-    Attribute(Attribute &&other);
+//    Attribute(Attribute &&other);
 //    Attribute(Attribute &&other) = default;
     Attribute& operator=(const Attribute &other);
+    Attribute& operator=(const std::string &value);
 //    Attribute& operator=(Attribute &&other) = default;
     ~Attribute();
 
     template<typename T>
     void operator=(const T &other);
 
+    bool isValid() const;
+    bool isNonExistingNamed() const;
     hid_t id() const;
     hid_t parentID() const;
     std::string name() const;
@@ -38,7 +42,8 @@ private:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
-    void openValidOther(const Attribute &other);
+    void constructFromOther(const Attribute &other);
+    void close();
 };
 
 template<typename T>
@@ -70,14 +75,14 @@ void Attribute::operator=(const T &other)
     hsize_t dims[1];
     dims[0] = 1;
     if(m_id != 0) {
-        H5Aclose(m_id);
-        m_id = 0;
+        close();
         H5Adelete(m_parentID, m_name.c_str());
     }
     hid_t dataspace = H5Screate_simple(1, &dims[0], NULL);
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(m_id, datatype, &other);
     H5Sclose(dataspace);
+    std::cerr << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID << std::endl;
 }
 
 }

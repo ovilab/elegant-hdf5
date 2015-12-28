@@ -27,16 +27,16 @@ Object::Object(const Object &other, Object::CopyMode mode)
     }
 }
 
-Object::Object(Object &&other)
-    : m_id(move(other.m_id))
-    , m_parentID(move(other.m_parentID))
-    , m_name(move(other.m_name))
-{
-#ifdef H5CPP_VERBOSE
-    cerr << "Move constructor object " << m_id << endl;
-#endif
-    other.m_id = 0;
-}
+//Object::Object(Object &&other)
+//    : m_id(move(other.m_id))
+//    , m_parentID(move(other.m_parentID))
+//    , m_name(move(other.m_name))
+//{
+//#ifdef H5CPP_VERBOSE
+//    cerr << "Move constructor object " << m_id << endl;
+//#endif
+//    other.m_id = 0;
+//}
 
 //Object& Object::operator=(Object &&other)
 //{
@@ -60,7 +60,12 @@ Object &Object::operator=(const Object &other)
 {
     bool copyFromExistingToExisting = isValid() && other.isValid();
     bool copyFromExistingToNonExisting = isNonExistingNamed() && other.isValid();
-    if(m_name != other.name() && (copyFromExistingToExisting || copyFromExistingToNonExisting)) {
+
+    bool isSame = (m_name == other.name() && m_parentID == other.parentID());
+    if(isSame) {
+        cerr << "Is the same object" << endl;
+        return *this;
+    } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
         close();
         if(copyFromExistingToExisting) {
             H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);

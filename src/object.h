@@ -31,7 +31,7 @@ public:
     };
 
     Object(const Object &other, CopyMode mode = CopyMode::OpenOnCopy);
-    Object(Object &&other);
+//    Object(Object &&other);
 //    Object(Dataset &&other) = delete;
 //    Object(Group &&other) = delete;
     Object& operator=(const Object &other);

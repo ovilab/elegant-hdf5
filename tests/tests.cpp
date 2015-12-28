@@ -133,14 +133,6 @@ int main()
     }
     cerr << "=======" << endl;
     {
-        File file("myfile.h5", File::OpenMode::ReadOnly);
-        for(const Attribute &attribute : file.attributes()) {
-            cerr << "Found attribute " << attribute.name() << endl;
-            cerr << attribute << endl;
-        }
-    }
-    cerr << "=======" << endl;
-    {
         File file("myfile.h5", File::OpenMode::ReadWrite);
         file["my_mat1"] = ones(2,3);
         file["my_mat2"] = file["my_mat1"]; // <---- TODO!
@@ -167,6 +159,26 @@ int main()
 
         Dataset d = file["my_mat1"];
         d = file["groupy"];
+    }
+    cerr << "=======" << endl;
+    {
+        File file("myfile.h5", File::OpenMode::ReadOnly);
+        for(const Attribute &attribute : file.attributes()) {
+            cerr << "Found attribute " << attribute.name() << endl;
+            cerr << attribute << endl;
+        }
+    }
+    cerr << "=======" << endl;
+    {
+        File file("myfile.h5", File::OpenMode::ReadWrite);
+        string bla = "blablabla";
+        file.attribute("tomb_raider") = bla;
+        file.attribute("lara_croft") = file.attribute("tomb_raider");
+
+        string tomb = file.attribute("tomb_raider");
+        string lara = file.attribute("lara_croft");
+        cerr << tomb << endl;
+        cerr << lara << endl;
     }
     cerr << "=======" << endl;
     return 0;
