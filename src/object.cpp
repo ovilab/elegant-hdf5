@@ -38,19 +38,38 @@ Object::Object(Object &&other)
     other.m_id = 0;
 }
 
-Object& Object::operator=(Object &&other)
-{
-#ifdef H5CPP_VERBOSE
-    cerr << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")" << endl;
-#endif
-    swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
-    m_parentID = move(other.m_parentID);
-    m_name = move(other.m_name);
-    return *this;
-}
+//Object& Object::operator=(Object &&other)
+//{
+//    if(m_id > 0 && other.id() > 0) {
+//        if(type() == Type::Dataset && other.type() == Type::Dataset) {
+//            cerr << "We could copy, but it's not yet implemented" << endl;
+//        } else {
+
+//        }
+//    }
+//#ifdef H5CPP_VERBOSE
+//    cerr << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")" << endl;
+//#endif
+//    swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
+//    m_parentID = move(other.m_parentID);
+//    m_name = move(other.m_name);
+//    return *this;
+//}
 
 Object &Object::operator=(const Object &other)
 {
+    bool copyFromExistingToExisting = isValid() && other.isValid();
+    bool copyFromExistingToNonExisting = isNonExistingNamed() && other.isValid();
+    if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
+        close();
+        if(copyFromExistingToExisting) {
+            H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
+        }
+        H5Ocopy(other.parentID(), other.name().c_str(),
+                m_parentID, m_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+        m_id = H5Oopen(m_parentID, m_name.c_str(), H5P_DEFAULT);
+        return *this;
+    }
     m_parentID = other.parentID();
     m_name = other.name();
     constructFromOther(other);
@@ -131,6 +150,21 @@ bool Object::isValid() const
         return false;
     }
     return true;
+}
+
+bool Object::isDataset() const
+{
+    return (type() == Type::Dataset);
+}
+
+bool Object::isGroup() const
+{
+    return (type() == Type::Group);
+}
+
+bool Object::isNonExistingNamed() const
+{
+    return (!isValid() && !m_name.empty() && m_parentID > 0);
 }
 
 Object::Type Object::fromHdf5Type(H5I_type_t hType) {

@@ -58,13 +58,14 @@ public:
 
     Dataset(const Object &other);
     Dataset(const Dataset &other);
-    Dataset(Dataset &&other);
+//    Dataset(Dataset &&other);
 
     ~Dataset();
 
     Dataset& operator=(const Object &other);
     Dataset& operator=(const Dataset &other);
-    Dataset& operator=(Dataset &&other);
+//    Dataset& operator=(Object &&other);
+//    Dataset& operator=(Dataset &&other);
 
     template<typename T>
     bool matchingExtents(const arma::Col<T> &v, hsize_t *extents) {
@@ -120,7 +121,7 @@ public:
     Dataset& operator=(const T &data)
     {
         std::cerr << "Dataset assignment operator of T" << std::endl;
-        std::cerr << "Is valid: " << isValid() << std::endl;
+        std::cerr << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id << std::endl;
         if(m_id == 0 && m_parentID > 0) {
             *this = Dataset::create(m_parentID, m_name, data);
         } else {

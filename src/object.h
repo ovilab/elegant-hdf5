@@ -37,7 +37,7 @@ public:
     Object& operator=(const Object &other);
     Object& operator=(const Dataset &other);
     Object& operator=(const Group &other);
-    Object& operator=(Object &&other);
+//    Object& operator=(Object &&other);
 
     template<typename T>
     void operator=(const T& other); // TODO: Consider operator chaining support
@@ -71,6 +71,9 @@ public:
     operator arma::Cube<T>() const;
 
     bool isValid() const;
+    bool isDataset() const;
+    bool isGroup() const;
+    bool isNonExistingNamed() const;
 
     static Type fromHdf5Type(H5I_type_t hType);
     static H5I_type_t toHdf5Type(Object::Type hType);

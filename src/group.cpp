@@ -136,7 +136,7 @@ Object Group::item(string key) const
     }
     hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
 #ifdef H5CPP_VERBOSE
-    cerr << "Open object " << id << endl;
+    cerr << "Open object " << key << " as " << id << endl;
 #endif
     return Object(id, m_id, key);
 }
