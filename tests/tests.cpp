@@ -6,14 +6,51 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
+//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
+#include <catch.hpp>
 #include <iostream>
+#include <glog/logging.h>
 
 using namespace std;
 using namespace h5cpp;
 using namespace arma;
 
-int main()
+int main( int argc, char* const argv[] )
 {
+    google::InitGoogleLogging(argv[0]);
+    int result = Catch::Session().run( argc, argv );
+    return result;
+}
+
+SCENARIO("Opening files in different modes", "[openfiles]") {
+    GIVEN("a truncated file" ) {
+        File file("myfile.h5", File::OpenMode::Truncate);
+        THEN("there should be no attributes") {
+            REQUIRE(file.attributeKeys().size() == 0);
+        }
+        THEN("there should be no keys") {
+            REQUIRE(file.keys().size() == 0);
+        }
+    }
+    GIVEN("a read/write file") {
+        File file("myfile.h5", File::OpenMode::ReadWrite);
+        THEN("we should be able to write") {
+            file["test"] = ones(10);
+        }
+        THEN("we should be able to read") {
+            cout << file["test"] << endl;
+        }
+    }
+    GIVEN("a read/write file") {
+        File file("myfile.h5", File::OpenMode::ReadOnly);
+        THEN("we should be able to read") {
+            cout << file["test"] << endl;
+        }
+    }
+}
+
+TEST_CASE("Testing stuff", "[stuff]"){
     {
         File file("myfile.h5", File::OpenMode::Truncate);
         cerr << file.attributeKeys().size() << endl;
@@ -181,6 +218,5 @@ int main()
         cerr << lara << endl;
     }
     cerr << "=======" << endl;
-    return 0;
 }
 

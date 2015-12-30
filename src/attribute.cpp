@@ -13,9 +13,8 @@ Attribute::Attribute(hid_t parentID, const std::string &name)
     , m_name(name)
 {
     m_id = H5Aopen(parentID, name.c_str(), H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-    cerr << "Construct attribute by parent and name " << *this << endl;
-#endif
+
+    DLOG(INFO) << "Construct attribute by parent and name " << *this;
 }
 
 Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)

@@ -1,7 +1,9 @@
 #include "file.h"
+#include "logging.h"
 
 #include <hdf5.h>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 
@@ -24,14 +26,10 @@ File::File(std::string fileName, File::OpenMode mode)
         default:
             break;
         }
-#ifdef H5CPP_VERBOSE
-        cerr << "Opened file with ID: " << m_id << endl;
-#endif
+        DLOG(INFO) << "Opened file with ID: " << m_id;
     } else {
         m_id = H5Fcreate(fileName.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-        cerr << "Created file with ID: " << m_id << endl;
-#endif
+        DLOG(INFO) << "Created file with ID: " << m_id;
     }
 }
 
@@ -43,9 +41,7 @@ File::~File()
 void File::close()
 {
     if(m_id > 0) {
-#ifdef H5CPP_VERBOSE
-        cerr << "Closing file " << m_id << endl;
-#endif
+        DLOG(INFO) << "Closing file " << m_id;
         H5Fclose(m_id);
         m_id = 0;
     }
