@@ -2,7 +2,7 @@
 
 #include "dataset.h"
 #include "group.h"
-#include "utils.h"
+#include "typehelper.h"
 
 using namespace std;
 

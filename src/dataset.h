@@ -2,8 +2,9 @@
 #define DATASET_H
 
 #include "object.h"
-#include "utils.h"
+#include "typehelper.h"
 #include "logging.h"
+#include "demangle.h"
 
 #include <armadillo>
 #include <iostream>
@@ -107,16 +108,19 @@ public:
     static Dataset create(hid_t parentID, const std::string &name, const arma::Gen<T, U> &data);
 
     template<typename T>
-    operator arma::Row<T>() const;
+    operator T();
 
-    template<typename T>
-    operator arma::Col<T>() const;
+    //    template<typename T>
+    //    operator arma::Row<T>() const;
 
-    template<typename T>
-    operator arma::Mat<T>() const;
+    //    template<typename T>
+    //    operator arma::Col<T>() const;
 
-    template<typename T>
-    operator arma::Cube<T>() const;
+    //    template<typename T>
+    //    operator arma::Mat<T>() const;
+
+    //    template<typename T>
+    //    operator arma::Cube<T>() const;
 private:
     //    void constructFromOther(const Object &other);
     //    void close();
@@ -296,98 +300,122 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const arma::Gen
 }
 
 template<typename T>
-Dataset::operator arma::Row<T>() const
+struct DatasetConverter
 {
-    DLOG(INFO) << "Making a row";
-    hid_t dataspace = H5Dget_space(m_id);
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
-    DLOG(INFO) << "Dimension count: " << dimensionCount;
+    static T convert(const Dataset& dataset);
+};
 
-    if(dimensionCount != 1) {
-        std::cerr << "ERROR: Tried to copy dataspace with "
-                  << dimensionCount << " dimensions to arma::Row." << std::endl;
-        return arma::Row<T>();
-    }
-
-    hsize_t extents[dimensionCount];
-
-    H5Sget_simple_extent_dims(dataspace, extents, NULL);
-    DLOG(INFO) << "Extents: " << extents[0];
-
-    arma::Row<T> matrix(extents[0]);
-
-    hid_t hdf5Datatype = TypeHelper<T>::hdfType();
-    H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
-    return matrix;
+template<typename T>
+inline Dataset::operator T()
+{
+    return DatasetConverter<T>::convert(*this);
 }
 
 template<typename T>
-Dataset::operator arma::Col<T>() const
+struct DatasetConverter<arma::Row<T>>
 {
-    hid_t dataspace = H5Dget_space(m_id);
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+    static arma::Row<T> convert(const Dataset& dataset)
+    {
+        DLOG(INFO) << "Making a row";
+        hid_t dataspace = H5Dget_space(dataset.id());
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+        DLOG(INFO) << "Dimension count: " << dimensionCount;
 
-    if(dimensionCount != 1) {
-        std::cerr << "ERROR: Tried to copy dataspace with "
-                  << dimensionCount << " dimensions to arma::Col." << std::endl;
-        return arma::Mat<T>();
+        if(dimensionCount != 1) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::Row." << std::endl;
+            return arma::Row<T>();
+        }
+
+        hsize_t extents[dimensionCount];
+
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
+        DLOG(INFO) << "Extents: " << extents[0];
+
+        arma::Row<T> matrix(extents[0]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(dataset.id(), hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
+        return matrix;
     }
-
-    hsize_t extents[dimensionCount];
-    H5Sget_simple_extent_dims(dataspace, extents, NULL);
-
-    arma::Col<T> matrix(extents[0]);
-
-    hid_t hdf5Datatype = TypeHelper<T>::hdfType();
-    H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
-    return matrix;
-}
+};
 
 template<typename T>
-Dataset::operator arma::Mat<T>() const
+struct DatasetConverter<arma::Col<T>>
 {
-    hid_t dataspace = H5Dget_space(m_id);
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+    static arma::Col<T> convert(const Dataset& dataset)
+    {
+        hid_t dataspace = H5Dget_space(dataset.id());
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
 
-    if(dimensionCount != 2) {
-        std::cerr << "ERROR: Tried to copy dataspace with "
-                  << dimensionCount << " dimensions to arma::mat." << std::endl;
-        return arma::Mat<T>();
+        if(dimensionCount != 1) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::Col." << std::endl;
+            return arma::Mat<T>();
+        }
+
+        hsize_t extents[dimensionCount];
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
+
+        arma::Col<T> matrix(extents[0]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(dataset.id(), hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
+        return matrix;
     }
-
-    hsize_t extents[dimensionCount];
-    H5Sget_simple_extent_dims(dataspace, extents, NULL);
-
-    arma::Mat<T> matrix(extents[0], extents[1]);
-
-    hid_t hdf5Datatype = TypeHelper<T>::hdfType();
-    H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
-    return matrix;
-}
+};
 
 template<typename T>
-Dataset::operator arma::Cube<T>() const
+struct DatasetConverter<arma::Mat<T>>
 {
-    hid_t dataspace = H5Dget_space(m_id);
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+    static arma::Mat<T> convert(const Dataset& dataset)
+    {
+        hid_t dataspace = H5Dget_space(dataset.id());
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
 
-    if(dimensionCount != 3) {
-        std::cerr << "ERROR: Tried to copy dataspace with "
-                  << dimensionCount << " dimensions to arma::Cube." << std::endl;
-        return arma::Cube<T>();
+        if(dimensionCount != 2) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::mat." << std::endl;
+            return arma::Mat<T>();
+        }
+
+        hsize_t extents[dimensionCount];
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
+
+        arma::Mat<T> matrix(extents[0], extents[1]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(dataset.id(), hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &matrix[0]);
+        return matrix;
     }
+};
 
-    hsize_t extents[dimensionCount];
-    H5Sget_simple_extent_dims(dataspace, extents, NULL);
+template<typename T>
+struct DatasetConverter<arma::Cube<T>>
+{
+    static arma::Cube<T> convert(const Dataset& dataset)
+    {
+        hid_t dataspace = H5Dget_space(dataset.id());
+        int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
 
-    arma::Cube<T> cube(extents[0], extents[1], extents[2]);
+        if(dimensionCount != 3) {
+            std::cerr << "ERROR: Tried to copy dataspace with "
+                      << dimensionCount << " dimensions to arma::Cube." << std::endl;
+            return arma::Cube<T>();
+        }
 
-    hid_t hdf5Datatype = TypeHelper<T>::hdfType();
-    H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cube[0]);
+        hsize_t extents[dimensionCount];
+        H5Sget_simple_extent_dims(dataspace, extents, NULL);
 
-    H5Sclose(dataspace);
-    return cube;
-}
+        arma::Cube<T> cube(extents[0], extents[1], extents[2]);
+
+        hid_t hdf5Datatype = TypeHelper<T>::hdfType();
+        H5Dread(dataset.id(), hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cube[0]);
+
+        H5Sclose(dataspace);
+        return cube;
+    }
+};
 
 }
 

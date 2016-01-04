@@ -1,7 +1,7 @@
 #ifndef H5CPP_ATTRIBUTE_H
 #define H5CPP_ATTRIBUTE_H
 
-#include "utils.h"
+#include "typehelper.h"
 #include "logging.h"
 
 #include <hdf5.h>

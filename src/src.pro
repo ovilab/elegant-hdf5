@@ -23,13 +23,14 @@ HEADERS += \
     group.h \
     object.h \
     attribute.h \
-    utils.h \
     logging.h \
     h5cpp/Dataset \
     h5cpp/File \
     h5cpp/Group \
     h5cpp/Object \
-    h5cpp/h5cpp
+    h5cpp/h5cpp \
+    typehelper.h \
+    demangle.h
 
 release {
     !debug {
