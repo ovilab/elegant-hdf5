@@ -17,7 +17,6 @@ SOURCES += \
     attribute.cpp
 
 HEADERS += \
-    conversions.h \
     dataset.h \
     file.h \
     group.h \
@@ -30,7 +29,11 @@ HEADERS += \
     h5cpp/Object \
     h5cpp/h5cpp \
     typehelper.h \
-    demangle.h
+    demangle.h \
+    h5cpp/armadillo \
+    converters/native-converters.h \
+    converters/armadillo-converters.h \
+    h5cpp/Attribute
 
 release {
     !debug {

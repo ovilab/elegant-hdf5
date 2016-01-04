@@ -58,6 +58,11 @@ Dataset Group::createDataset(std::string name, arma::Mat<T> data)
     return Dataset::create(m_id, name, data);
 }
 
+template<>
+inline Object::operator Group() {
+    return Group(*this);
+}
+
 }
 
 #endif // GROUP_H

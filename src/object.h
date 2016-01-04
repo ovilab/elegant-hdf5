@@ -60,16 +60,19 @@ public:
     hid_t id() const;
 
     template<typename T>
-    operator arma::Row<T>() const;
+    operator T();
 
-    template<typename T>
-    operator arma::Col<T>() const;
+//    template<typename T>
+//    operator arma::Row<T>() const;
 
-    template<typename T>
-    operator arma::Mat<T>() const;
+//    template<typename T>
+//    operator arma::Col<T>() const;
 
-    template<typename T>
-    operator arma::Cube<T>() const;
+//    template<typename T>
+//    operator arma::Mat<T>() const;
+
+//    template<typename T>
+//    operator arma::Cube<T>() const;
 
     bool isValid() const;
     bool isDataset() const;
@@ -92,48 +95,57 @@ private:
 };
 
 template<typename T>
-Object::operator arma::Row<T>() const
-{
+Object::operator T() {
     if(type() != Type::Dataset) {
-        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
-        return arma::Mat<T>();
+        DLOG(ERROR) << "Tried to convert non-dataset object to other T"; // TODO: Add demangle and friends
     }
     Dataset dataset = *this;
     return dataset;
 }
 
-template<typename T>
-Object::operator arma::Col<T>() const
-{
-    if(type() != Type::Dataset) {
-        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
-        return arma::Mat<T>();
-    }
-    Dataset dataset = *this;
-    return dataset;
-}
+//template<typename T>
+//Object::operator arma::Row<T>() const
+//{
+//    if(type() != Type::Dataset) {
+//        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
+//        return arma::Mat<T>();
+//    }
+//    Dataset dataset = *this;
+//    return dataset;
+//}
 
-template<typename T>
-Object::operator arma::Mat<T>() const
-{
-    if(type() != Type::Dataset) {
-        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
-        return arma::Mat<T>();
-    }
-    Dataset dataset = *this;
-    return dataset;
-}
+//template<typename T>
+//Object::operator arma::Col<T>() const
+//{
+//    if(type() != Type::Dataset) {
+//        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
+//        return arma::Mat<T>();
+//    }
+//    Dataset dataset = *this;
+//    return dataset;
+//}
 
-template<typename T>
-Object::operator arma::Cube<T>() const
-{
-    if(type() != Type::Dataset) {
-        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat.";
-        return arma::Cube<T>();
-    }
-    Dataset dataset = *this;
-    return dataset;
-}
+//template<typename T>
+//Object::operator arma::Mat<T>() const
+//{
+//    if(type() != Type::Dataset) {
+//        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
+//        return arma::Mat<T>();
+//    }
+//    Dataset dataset = *this;
+//    return dataset;
+//}
+
+//template<typename T>
+//Object::operator arma::Cube<T>() const
+//{
+//    if(type() != Type::Dataset) {
+//        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat.";
+//        return arma::Cube<T>();
+//    }
+//    Dataset dataset = *this;
+//    return dataset;
+//}
 
 }
 

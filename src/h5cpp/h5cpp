@@ -1,4 +1,8 @@
-#include "Dataset"
-#include "File"
-#include "Group"
-#include "Object"
+#include "./Attribute"
+#include "./Dataset"
+#include "./File"
+#include "./Group"
+#include "./Object"
+
+#include "./armadillo"
+#include "../converters/native-converters.h"

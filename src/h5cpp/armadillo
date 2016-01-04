@@ -1,0 +1,7 @@
+#ifndef ARMADILLO
+#define ARMADILLO
+
+#include "../converters/armadillo-converters.h"
+
+#endif // ARMADILLO
+

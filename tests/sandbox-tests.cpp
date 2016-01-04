@@ -1,3 +1,24 @@
+#include <catch.hpp>
+
+#include <h5cpp/h5cpp>
+
+using namespace h5cpp;
+
+SCENARIO("sandbox", "[sandbox]") {
+    GIVEN("something") {
+        WHEN("something") {
+            THEN("something") {
+                File a("myfile.h5");
+                a["banana"] = 10;
+                a["lol"] = 12.4;
+
+                int test = a["banana"];
+                REQUIRE(test == 10);
+            }
+        }
+    }
+}
+
 //TEST_CASE("Testing stuff", "[stuff]"){
 //    cerr << "=======" << endl;
 //    cerr << "=======" << endl;
