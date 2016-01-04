@@ -10,7 +10,7 @@ using namespace arma;
 
 SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
     GIVEN("a truncated file") {
-        File file("myfile.h5", File::OpenMode::Truncate);
+        File file("armadillo.h5", File::OpenMode::Truncate);
         WHEN("writing a column vector") {
             colvec c = ones(5);
             file["my_colvec"] = c;
@@ -54,6 +54,25 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 double diffs = diff.max();
                 REQUIRE(0 == Approx(diffs));
             }
+        }
+        WHEN("writing a generated object") {
+            file["my_ones"] = ones(2, 4);
+            THEN("the same should be read back") {
+                mat C = ones(2, 4);
+                mat D = file["my_ones"];
+                REQUIRE(0 == Approx(max(max(abs(C - D)))));
+            }
+        }
+        WHEN("writing an operation result") {
+            mat A = ones(2, 4);
+            mat B = ones(2, 4);
+            file["my_add"] = A + B;
+//            THEN("the result should be read back") {
+//                mat C = A + B;
+//                mat D = file["my_add"];
+//                cout << D << endl;
+//                REQUIRE(0 == Approx(max(max(abs(C - D)))));
+//            }
         }
     }
 }

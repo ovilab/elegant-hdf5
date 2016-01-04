@@ -12,46 +12,6 @@
 
 namespace h5cpp {
 
-template<class T>
-struct is_vec {
-    static constexpr bool value = false;
-};
-
-template<>
-struct is_vec<arma::vec> {
-    static constexpr bool value = true;
-};
-
-template<class T>
-struct is_vec<arma::Col<T>> {
-    static constexpr bool value = true;
-};
-
-template<class T>
-struct is_vec<arma::Row<T>> {
-    static constexpr bool value = true;
-};
-
-template<class T>
-struct is_mat {
-    static constexpr bool value = false;
-};
-
-template<class T>
-struct is_mat<arma::Mat<T>> {
-    static constexpr bool value = true;
-};
-
-template<class T>
-struct is_cube {
-    static constexpr bool value = false;
-};
-
-template<class T>
-struct is_cube<arma::Cube<T>> {
-    static constexpr bool value = true;
-};
-
 class Dataset : public Object
 {
 public:
@@ -69,10 +29,6 @@ public:
 
     template<typename T>
     Dataset& operator=(const T &data);
-
-    // TODO Support other arma temporaries, like eOp
-    template<typename T, typename U>
-    Dataset& operator=(const arma::Gen<T, U> &data);
 
     template<typename T>
     static Dataset create(hid_t parentID, const std::string &name, const T &data);
@@ -137,20 +93,14 @@ Dataset& Dataset::operator=(const T &data)
         } else {
             DLOG(INFO) << "Writing to old dataset";
             hid_t datatype = TypeHelper<T>::hdfType();
-            herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::readBuffer(data));
+            TypeHelper<T> temporary;
+            herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
             H5Sclose(dataspace);
             if(errors < 0) {
                 DLOG(INFO) << "Error writing to dataset!";
             }
         }
     }
-    return *this;
-}
-
-template<typename T, typename U>
-Dataset& Dataset::operator=(const arma::Gen<T, U> &data) {
-    T dataReal = data;
-    *this = dataReal;
     return *this;
 }
 
@@ -170,7 +120,8 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
     hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
                               H5P_DEFAULT, creationParameters, H5P_DEFAULT);
     if(dataset > 0) {
-        herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::readBuffer(data));
+        TypeHelper<T> temporary;
+        herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
         if(errors >= 0) {
             H5Sclose(dataspace);
             DLOG(INFO) << "Returning the created dataset " << dataset;
