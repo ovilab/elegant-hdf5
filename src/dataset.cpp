@@ -41,7 +41,7 @@ Dataset::Dataset(const Dataset &other)
 Dataset& Dataset::operator=(const Object &other)
 {
     if(!other.isDataset()) {
-        cerr << "ERROR: Cannot assign to Dataset with " << other << endl;
+        DLOG(INFO) << "ERROR: Cannot assign to Dataset with " << other;
         return *this;
     }
     Object::operator=(other);
@@ -74,7 +74,7 @@ Dataset& Dataset::operator=(const Dataset &other)
 //        close();
 //        m_id = H5Dopen(other.id(), ".", H5P_DEFAULT);
 //#ifdef H5CPP_VERBOSE
-//        cerr << "Opened dataset " << m_id << " from other " << other.id() << endl;
+//        DLOG(INFO) << "Opened dataset " << m_id << " from other " << other.id();
 //#endif
 //        m_name = other.name();
 //        m_parentID = other.parentID();
@@ -84,7 +84,7 @@ Dataset& Dataset::operator=(const Dataset &other)
 //        m_name = other.name();
 //        m_parentID = other.parentID();
 //    } else {
-//        cerr << "ERROR: Cannot construct Dataset from " << other << endl;
+//        DLOG(INFO) << "ERROR: Cannot construct Dataset from " << other;
 //    }
 //}
 
@@ -92,7 +92,7 @@ Dataset& Dataset::operator=(const Dataset &other)
 //{
 //    if(m_id > 0) {
 //#ifdef H5CPP_VERBOSE
-//    cerr << "Closing dataset " << m_id << endl;
+//    DLOG(INFO) << "Closing dataset " << m_id;
 //#endif
 //        H5Dclose(m_id);
 //        m_id = 0;

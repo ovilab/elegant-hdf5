@@ -1,14 +1,15 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include "logging.h"
+#include "attribute.h"
+#include "dataset.h"
+#include "object.h"
+
 #include <string>
 #include <hdf5.h>
 #include <vector>
 #include <iostream>
-
-#include "attribute.h"
-#include "dataset.h"
-#include "object.h"
 
 namespace h5cpp {
 

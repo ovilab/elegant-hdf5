@@ -14,4 +14,15 @@ INCLUDEPATH += ../src
 LIBS += -lh5cpp -L../src
 
 SOURCES += \
-    tests.cpp
+    tests.cpp \
+    attribute-tests.cpp \
+    armadillo-tests.cpp \
+    file-tests.cpp \
+    group-tests.cpp \
+    sandbox-tests.cpp
+
+release {
+    !debug {
+        DEFINES += NDEBUG
+    }
+}

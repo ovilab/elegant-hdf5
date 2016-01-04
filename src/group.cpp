@@ -27,7 +27,7 @@ Group::Group(const Group &other)
 //    : Object(move(other))
 //{
 //#ifdef H5CPP_VERBOSE
-//    cerr << "Move constructor group" << endl;
+//    DLOG(INFO) << "Move constructor group";
 //#endif
 //}
 
@@ -100,9 +100,7 @@ Object Group::item(string key) const
         return Object(0, m_id, key);
     }
     hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-    cerr << "Open object " << key << " as " << id << endl;
-#endif
+    DLOG(INFO) << "Open object " << key << " as " << id;
     return Object(id, m_id, key);
 }
 
@@ -182,11 +180,11 @@ std::string parentPath(string &path)
 Group Group::createGroup(string name)
 {
     if(!isValid()) {
-        cerr << "ERROR: Cannot create group in invalid object " << *this << endl;
+        DLOG(INFO) << "ERROR: Cannot create group in invalid object " << *this;
         return Group();
     }
     if(hasKey(name)) {
-        cerr << "ERROR: Cannot create group. An object already exists with name " << name << endl;
+        DLOG(INFO) << "ERROR: Cannot create group. An object already exists with name " << name;
         return Group();
     }
     string parentPathName = parentPath(name);
@@ -194,9 +192,7 @@ Group Group::createGroup(string name)
         createGroup(parentPathName);
     }
     hid_t groupID = H5Gcreate(m_id, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-    cerr << "Created group with id " << groupID << endl;
-#endif
+    DLOG(INFO) << "Created group with id " << groupID;
     return Group(groupID, m_id, name);
 }
 

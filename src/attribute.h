@@ -2,6 +2,7 @@
 #define H5CPP_ATTRIBUTE_H
 
 #include "utils.h"
+#include "logging.h"
 
 #include <hdf5.h>
 #include <ostream>
@@ -51,12 +52,12 @@ Attribute::operator T() const
 {
     T value{};
     if(m_id == 0) {
-        std::cerr << "ERROR: Attempted use of undefined attribute '" << m_name << "'." << std::endl;
+        DLOG(INFO) << "ERROR: Attempted use of undefined attribute '" << m_name << "'.";
         return value;
     }
     hid_t datatype = TypeHelper<T>::hdfType();
     if(datatype < 1) {
-        std::cerr << "ERROR: Unknown conversion of attribute." << std::endl;
+        DLOG(INFO) << "ERROR: Unknown conversion of attribute.";
         return value;
     }
     H5Aread(m_id, datatype, &value);
@@ -69,7 +70,7 @@ void Attribute::operator=(const T &other)
 {
     hid_t datatype = TypeHelper<T>::hdfType();
     if(datatype < 1) {
-        std::cerr << "ERROR: Cannot convert unknown type to attribute" << std::endl;
+        DLOG(INFO) << "ERROR: Cannot convert unknown type to attribute";
         return;
     }
     hsize_t dims[1];
@@ -82,7 +83,7 @@ void Attribute::operator=(const T &other)
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(m_id, datatype, &other);
     H5Sclose(dataspace);
-    std::cerr << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID << std::endl;
+    DLOG(INFO) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 
 }

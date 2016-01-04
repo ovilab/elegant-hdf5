@@ -33,7 +33,7 @@ Object::Object(const Object &other, Object::CopyMode mode)
 //    , m_name(move(other.m_name))
 //{
 //#ifdef H5CPP_VERBOSE
-//    cerr << "Move constructor object " << m_id << endl;
+//    DLOG(INFO) << "Move constructor object " << m_id;
 //#endif
 //    other.m_id = 0;
 //}
@@ -42,13 +42,13 @@ Object::Object(const Object &other, Object::CopyMode mode)
 //{
 //    if(m_id > 0 && other.id() > 0) {
 //        if(type() == Type::Dataset && other.type() == Type::Dataset) {
-//            cerr << "We could copy, but it's not yet implemented" << endl;
+//            DLOG(INFO) << "We could copy, but it's not yet implemented";
 //        } else {
 
 //        }
 //    }
 //#ifdef H5CPP_VERBOSE
-//    cerr << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")" << endl;
+//    DLOG(INFO) << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")";
 //#endif
 //    swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
 //    m_parentID = move(other.m_parentID);
@@ -63,7 +63,7 @@ Object &Object::operator=(const Object &other)
 
     bool isSame = (m_name == other.name() && m_parentID == other.parentID());
     if(isSame) {
-        cerr << "Is the same object" << endl;
+        DLOG(INFO) << "Is the same object";
         return *this;
     } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
         close();
@@ -98,14 +98,10 @@ void Object::constructFromOther(const Object &other)
     close();
     if(other.isValid()) {
         m_id = H5Oopen(other.id(), ".", H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-        cerr << "Opened other object " << other << " to " << m_id << endl;
-#endif
+        DLOG(INFO) << "Opened other object " << other << " to " << m_id;
     } else {
         m_id = other.id();
-#ifdef H5CPP_VERBOSE
-        cerr << "Copied other " << m_id << endl;
-#endif
+        DLOG(INFO) << "Copied other " << m_id;
     }
     m_name = other.name();
     m_parentID = other.parentID();
@@ -115,9 +111,7 @@ void Object::close()
 {
     if(m_id > 0) {
         H5Oclose(m_id);
-#ifdef H5CPP_VERBOSE
-        cerr << "Closing object " << m_id << endl;
-#endif
+        DLOG(INFO) << "Closing object " << m_id;
         m_id = 0;
     }
 }

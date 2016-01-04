@@ -22,9 +22,7 @@ Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
     , m_parentID(parentID)
     , m_name(name)
 {
-#ifdef H5CPP_VERBOSE
-    cerr << "Creating attribute " << *this << endl;
-#endif
+    DLOG(INFO) << "Creating attribute " << *this;
 }
 
 //Attribute::Attribute(Attribute &&other)
@@ -37,7 +35,7 @@ Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
 
 Attribute::Attribute(const Attribute &other)
 {
-    cerr << "Copy construct attribute" << endl;
+    DLOG(INFO) << "Copy construct attribute";
     constructFromOther(other);
 }
 
@@ -60,10 +58,10 @@ Attribute &Attribute::operator=(const Attribute &other)
 
     bool isSame = (m_name == other.name() && m_parentID == other.parentID());
     if(isSame) {
-        cerr << "Is the same attribute" << endl;
+        DLOG(INFO) << "Is the same attribute";
         return *this;
     } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
-        cerr << "Copying attribute " << other << " to " << *this << endl;
+        DLOG(INFO) << "Copying attribute " << other << " to " << *this;
         close();
         if(copyFromExistingToExisting) {
             H5Adelete(m_parentID, m_name.c_str());
@@ -93,7 +91,7 @@ Attribute &Attribute::operator=(const Attribute &other)
         H5Sclose(otherDataspace);
         return *this;
     }
-    cerr << "Constructing from other" << endl;
+    DLOG(INFO) << "Constructing from other";
     constructFromOther(other);
     return *this;
 }
@@ -103,13 +101,9 @@ void Attribute::constructFromOther(const Attribute &other) {
     m_parentID = other.parentID();
     if(other.isValid()) {
         m_id = H5Aopen(other.parentID(), other.name().c_str(), H5P_DEFAULT);
-#ifdef H5CPP_VERBOSE
-        cerr << "Opening " << other << " to become " << *this << endl;
-#endif
+        DLOG(INFO) << "Opening " << other << " to become " << *this;
     } else {
-#ifdef H5CPP_VERBOSE
-        cerr << "Copying other attribute " << other << endl;
-#endif
+        DLOG(INFO) << "Copying other attribute " << other;
         m_id = other.id();
     }
 }
@@ -122,9 +116,7 @@ Attribute::~Attribute()
 void Attribute::close()
 {
     if(m_id != 0) {
-#ifdef H5CPP_VERBOSE
-        cerr << "Close attribute " << m_id << endl;
-#endif
+        DLOG(INFO) << "Close attribute " << m_id;
         H5Aclose(m_id);
         m_id = 0;
     }
@@ -132,7 +124,7 @@ void Attribute::close()
 
 bool Attribute::isValid() const
 {
-    cerr << "Valid attribute: " << m_id << m_name << m_parentID << endl;
+    DLOG(INFO) << "Valid attribute: " << m_id << m_name << m_parentID;
     return (m_id > 0 && !m_name.empty() && m_parentID > 0);
 }
 
@@ -164,14 +156,14 @@ h5cpp::Attribute::operator std::string() const
     hid_t attributeType = H5Aget_type(m_id);
     hid_t typeClass = H5Tget_class(attributeType);
     if (typeClass != H5T_STRING) {
-        std::cerr << "ERROR: Trying to output non-string type to string. This is not yet supported." << std::endl;
+        DLOG(INFO) << "ERROR: Trying to output non-string type to string. This is not yet supported.";
         return std::string();
     }
 
     H5A_info_t attributeInfo;
     herr_t infoError = H5Aget_info(m_id, &attributeInfo);
     if(infoError < 0) {
-        std::cerr << "ERROR: Could not fetch attribute info for " << m_name << "." << std::endl;
+        DLOG(INFO) << "ERROR: Could not fetch attribute info for " << m_name << ".";
         return std::string();
     }
 

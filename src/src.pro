@@ -25,6 +25,15 @@ HEADERS += \
     object.h \
     attribute.h \
     utils.h \
-    logging.h
+    logging.h \
+    h5cpp/Dataset \
+    h5cpp/File \
+    h5cpp/Group \
+    h5cpp/Object \
+    h5cpp/h5cpp
 
-DEFINES += H5CPP_VERBOSE
+release {
+    !debug {
+        DEFINES += NDEBUG
+    }
+}

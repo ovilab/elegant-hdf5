@@ -1,12 +1,13 @@
 #ifndef TEMP_H
 #define TEMP_H
 
+#include "logging.h"
+//#include "dataset.h"
+
 #include <hdf5.h>
 #include <string>
 #include <armadillo>
 #include <iostream>
-
-//#include "dataset.h"
 
 namespace h5cpp {
 //class Object;
@@ -94,7 +95,7 @@ template<typename T>
 Object::operator arma::Row<T>() const
 {
     if(type() != Type::Dataset) {
-        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
         return arma::Mat<T>();
     }
     Dataset dataset = *this;
@@ -105,7 +106,7 @@ template<typename T>
 Object::operator arma::Col<T>() const
 {
     if(type() != Type::Dataset) {
-        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
         return arma::Mat<T>();
     }
     Dataset dataset = *this;
@@ -116,7 +117,7 @@ template<typename T>
 Object::operator arma::Mat<T>() const
 {
     if(type() != Type::Dataset) {
-        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat. " << std::endl;
+        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat. ";
         return arma::Mat<T>();
     }
     Dataset dataset = *this;
@@ -127,7 +128,7 @@ template<typename T>
 Object::operator arma::Cube<T>() const
 {
     if(type() != Type::Dataset) {
-        std::cerr << "ERROR: Tried to convert non-dataset object to arma::mat." << std::endl;
+        DLOG(INFO) << "ERROR: Tried to convert non-dataset object to arma::mat.";
         return arma::Cube<T>();
     }
     Dataset dataset = *this;

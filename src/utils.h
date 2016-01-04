@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "logging.h"
+
 #include <hdf5.h>
 #include <string>
 #include <type_traits>
