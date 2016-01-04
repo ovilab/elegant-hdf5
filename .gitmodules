@@ -1,3 +1,6 @@
 [submodule "libs/spdlog"]
 	path = libs/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "libs/Catch"]
+	path = libs/Catch
+	url = https://github.com/philsquared/Catch.git

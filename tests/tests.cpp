@@ -1,14 +1,12 @@
+//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
+#include <catch.hpp>
+
 #include "../src/file.h"
 #include "../src/object.h"
 #include "../src/dataset.h"
 #include "../src/attribute.h"
 
-#include <hdf5.h>
-#include <hdf5_hl.h>
-
-//#define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
 #include <iostream>
 #include <glog/logging.h>
 

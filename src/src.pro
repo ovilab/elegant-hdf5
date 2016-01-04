@@ -6,7 +6,6 @@ CONFIG -= qt
 TARGET = h5cpp
 
 INCLUDEPATH += /usr/include/hdf5/serial
-INCLUDEPATH += ../libs/spdlog/include/
 
 LIBS += -lhdf5_serial
 
