@@ -17,11 +17,12 @@ LIBS += -lh5cpp -L../src
 
 SOURCES += \
     tests.cpp \
-#    attribute-tests.cpp \
-#    armadillo-tests.cpp \
-#    file-tests.cpp \
-#    group-tests.cpp \
-    sandbox-tests.cpp
+    attribute-tests.cpp \
+    armadillo-tests.cpp \
+    file-tests.cpp \
+    group-tests.cpp \
+    sandbox-tests.cpp \
+    std-tests.cpp
 
 release {
     !debug {

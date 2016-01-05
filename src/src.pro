@@ -33,7 +33,8 @@ HEADERS += \
     h5cpp/armadillo \
     converters/native-converters.h \
     converters/armadillo-converters.h \
-    h5cpp/Attribute
+    h5cpp/Attribute \
+    converters/std-converters.h
 
 release {
     !debug {

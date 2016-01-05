@@ -9,16 +9,17 @@ using namespace arma;
 SCENARIO("sandbox", "[sandbox]") {
     GIVEN("something") {
         File file("armadillo.h5", File::OpenMode::Truncate);
+//        file.close();
         WHEN("writing an operation result") {
             mat A = ones(2, 4);
             mat B = ones(2, 4);
-            file["my_add"] = A + B;
-//            THEN("the result should be read back") {
-//                mat C = A + B;
-//                mat D = file["my_add"];
-//                cout << D << endl;
-//                REQUIRE(0 == Approx(max(max(abs(C - D)))));
-//            }
+            file["my_add"] = A + 2*sqrt(B);
+            THEN("the result should be read back") {
+                mat C = A + 2*B;
+                mat D = file["my_add"];
+                cout << D << endl;
+                REQUIRE(0 == Approx(max(max(abs(C - D)))));
+            }
         }
     }
 }

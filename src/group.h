@@ -47,9 +47,6 @@ public:
 
 private:
     Group(hid_t id, hid_t parentID, std::string name);
-
-//    void constructFromOther(const Object &other);
-//    void close();
 };
 
 template<typename T>

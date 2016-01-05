@@ -6,3 +6,4 @@
 
 #include "./armadillo"
 #include "../converters/native-converters.h"
+#include "../converters/std-converters.h"

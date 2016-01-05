@@ -10,12 +10,18 @@ using namespace arma;
 
 SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
     GIVEN("a truncated file") {
-        File file("armadillo.h5", File::OpenMode::Truncate);
+        File file("armadillo.h5", File::OpenMode::ReadWrite);
         WHEN("writing a column vector") {
             colvec c = ones(5);
             file["my_colvec"] = c;
             THEN("the same should be read back") {
                 colvec cr = file["my_colvec"];;
+                vector<double> diff;
+
+                set_difference(c.begin(), c.end(), cr.begin(), cr.end(),
+                                    inserter(diff, diff.begin()));
+
+                REQUIRE(diff.size() == 0);
                 REQUIRE(0 == Approx(max(abs(c - cr))));
             }
         }
@@ -66,13 +72,12 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
         WHEN("writing an operation result") {
             mat A = ones(2, 4);
             mat B = ones(2, 4);
-            file["my_add"] = A + B;
-//            THEN("the result should be read back") {
-//                mat C = A + B;
-//                mat D = file["my_add"];
-//                cout << D << endl;
-//                REQUIRE(0 == Approx(max(max(abs(C - D)))));
-//            }
+            file["my_add"] = A + 2*B;
+            THEN("the result should be read back") {
+                mat C = A + 2*B;
+                mat D = file["my_add"];
+                REQUIRE(0 == Approx(max(max(abs(C - D)))));
+            }
         }
     }
 }
