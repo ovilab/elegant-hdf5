@@ -36,7 +36,7 @@ SCENARIO("Opening files in different modes", "[openfiles]") {
 
 SCENARIO("Working with invalid files", "[invalidfiles]") {
     GIVEN("a closed file") {
-        File file("armadillo.h5", File::OpenMode::Truncate);
+        File file("invalid.h5", File::OpenMode::Truncate);
         file.close();
         WHEN("writing to it") {
             mat A = ones(2, 4);

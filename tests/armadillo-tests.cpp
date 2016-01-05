@@ -9,6 +9,9 @@ using namespace arma;
 
 SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
     GIVEN("a truncated file") {
+        File file("armadillo.h5", File::OpenMode::Truncate);
+    }
+    GIVEN("a read-write file") {
         File file("armadillo.h5", File::OpenMode::ReadWrite);
         WHEN("writing a column vector") {
             colvec c = ones(5);
