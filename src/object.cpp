@@ -66,7 +66,7 @@ Object &Object::operator=(const Object &other)
         DLOG(INFO) << "Is the same object";
         return *this;
     } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
-        close();
+        closeObject();
         if(copyFromExistingToExisting) {
             H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
         }
@@ -95,7 +95,7 @@ Object &Object::operator =(const Group &other)
 
 void Object::constructFromOther(const Object &other)
 {
-    close();
+    closeObject();
     if(other.isValid()) {
         m_id = H5Oopen(other.id(), ".", H5P_DEFAULT);
         DLOG(INFO) << "Opened other object " << other << " to " << m_id;
@@ -107,7 +107,7 @@ void Object::constructFromOther(const Object &other)
     m_parentID = other.parentID();
 }
 
-void Object::close()
+void Object::closeObject()
 {
     if(m_id > 0) {
         H5Oclose(m_id);
@@ -118,7 +118,7 @@ void Object::close()
 
 Object::~Object()
 {
-    close();
+    closeObject();
 }
 
 const std::string& Object::name() const

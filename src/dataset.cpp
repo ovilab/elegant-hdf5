@@ -18,7 +18,7 @@ Dataset::Dataset()
 
 Dataset::~Dataset()
 {
-    close();
+    closeObject();
 }
 
 Dataset::Dataset(hid_t id, hid_t parentID, string name)

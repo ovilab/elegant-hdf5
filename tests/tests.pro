@@ -21,8 +21,8 @@ SOURCES += \
     armadillo-tests.cpp \
     file-tests.cpp \
     group-tests.cpp \
-    sandbox-tests.cpp \
-    std-tests.cpp
+    std-tests.cpp \
+    sandbox-tests.cpp
 
 release {
     !debug {

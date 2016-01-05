@@ -33,7 +33,7 @@ Group::Group(const Group &other)
 
 Group::~Group()
 {
-    close();
+    closeObject();
 }
 
 Group::Group(const Object &other)
@@ -65,8 +65,12 @@ Group::Group(hid_t id, hid_t parentID, string name)
 {
 }
 
-std::vector<std::string> Group::keys() const
+vector<string> Group::keys() const
 {
+    if(!isValid()) {
+        DLOG(ERROR) << "Object is not valid. Cannot request list of keys. " << *this;
+        return vector<string>();
+    }
     vector<string> returnedKeys;
     hsize_t idx = 0;
     H5_index_t l = H5_INDEX_NAME;
@@ -85,9 +89,9 @@ std::vector<std::string> Group::keys() const
     return returnedKeys;
 }
 
-std::vector<Object> Group::items() const
+vector<Object> Group::items() const
 {
-    std::vector<Object> returnedItems;
+    vector<Object> returnedItems;
     for(auto key : keys()) {
         returnedItems.push_back(item(key));
     }
@@ -96,6 +100,9 @@ std::vector<Object> Group::items() const
 
 Object Group::item(string key) const
 {
+    if(!isValid()) {
+        throw(std::runtime_error("Requested key from from invalid group object"));
+    }
     if(!hasKey(key)) {
         return Object(0, m_id, key);
     }
@@ -104,7 +111,7 @@ Object Group::item(string key) const
     return Object(id, m_id, key);
 }
 
-std::vector<std::string> Group::attributeKeys() const
+vector<string> Group::attributeKeys() const
 {
     vector<string> returnedAttributes;
     hsize_t idx = 0;
@@ -142,13 +149,13 @@ Attribute Group::attribute(string key) const
     return Attribute(m_id, key);
 }
 
-std::vector<std::string> split(const std::string &s, char delim)
+vector<string> split(const string &s, char delim)
 {
-    std::vector<std::string> elements;
-    std::string item;
+    vector<string> elements;
+    string item;
 
-    std::stringstream ss(s);
-    while (std::getline(ss, item, delim)) {
+    stringstream ss(s);
+    while (getline(ss, item, delim)) {
         if(!item.empty()) {
             elements.push_back(item);
         }
@@ -156,14 +163,14 @@ std::vector<std::string> split(const std::string &s, char delim)
     return elements;
 }
 
-std::string parentPath(string &path)
+string parentPath(string &path)
 {
     vector<string> splitPath = split(path, '/');
     int pathCount = splitPath.size();
     if(pathCount < 2) {
         return "";
     }
-    std::stringstream fullPath;
+    stringstream fullPath;
     int count = 0;
     for(const string &part : splitPath) {
         fullPath << part;
@@ -180,11 +187,14 @@ std::string parentPath(string &path)
 Group Group::createGroup(string name)
 {
     if(!isValid()) {
-        DLOG(INFO) << "ERROR: Cannot create group in invalid object " << *this;
-        return Group();
+        throw(std::runtime_error("Cannot create group in invalid object"));
     }
     if(hasKey(name)) {
-        DLOG(INFO) << "ERROR: Cannot create group. An object already exists with name " << name;
+        if(item(name).type() == Type::Group) {
+            DLOG(WARNING) << "WARNING: Group already exists with name " << name;
+        } else {
+            throw(std::runtime_error("Cannot create group. A non-group object already exists with that name."));
+        }
         return Group();
     }
     string parentPathName = parentPath(name);
@@ -198,9 +208,12 @@ Group Group::createGroup(string name)
 
 bool Group::hasKey(string name) const
 {
-    std::vector<std::string> paths = split(name, '/');
-    std::stringstream fullPath;
-    for(const std::string &part : paths) {
+    if(!isValid()) {
+        return false;
+    }
+    vector<string> paths = split(name, '/');
+    stringstream fullPath;
+    for(const string &part : paths) {
         fullPath << part;
         if(H5Lexists(m_id, fullPath.str().c_str(), H5P_DEFAULT) != true) {
             return false;
@@ -210,10 +223,10 @@ bool Group::hasKey(string name) const
     return true;
 }
 
-std::vector<Attribute> Group::attributes() const
+vector<Attribute> Group::attributes() const
 {
-    std::vector<Attribute> returnedAttributes;
-    for(std::string key : attributeKeys()) {
+    vector<Attribute> returnedAttributes;
+    for(string key : attributeKeys()) {
         returnedAttributes.emplace_back(attribute(key));
     }
     return returnedAttributes;

@@ -6,20 +6,28 @@
 using namespace h5cpp;
 using namespace arma;
 
-SCENARIO("sandbox", "[sandbox]") {
-    GIVEN("something") {
-        File file("armadillo.h5", File::OpenMode::Truncate);
-//        file.close();
-        WHEN("writing an operation result") {
-            mat A = ones(2, 4);
-            mat B = ones(2, 4);
-            file["my_add"] = A + 2*sqrt(B);
-            THEN("the result should be read back") {
-                mat C = A + 2*B;
-                mat D = file["my_add"];
-                cout << D << endl;
-                REQUIRE(0 == Approx(max(max(abs(C - D)))));
+SCENARIO("Continuing work on a closed file", "[!hide]") {
+    GIVEN("a truncated file") {
+        File file("closed.h5", File::OpenMode::Truncate);
+        WHEN("we assign a few objects and close the file") {
+            Group group = file.createGroup("my_group");
+            group["my_dataset"] = 24;
+            group.attribute("my_attribute") = 12.1;
+            Dataset dataset = group["my_dataset"];
+            Attribute attribute = group.attribute("my_attribute");
+            file.close();
+            THEN("the objects should still cout fine") {
+                REQUIRE_NOTHROW(cout << dataset << endl);
+                REQUIRE_NOTHROW(cout << attribute << endl);
             }
+            THEN("the objects should throw on access") {
+                REQUIRE_THROWS(int i = group["my_dataset"]);
+                REQUIRE_THROWS(double d = group.attribute("my_attribute"));
+            }
+//            THEN("re-opening the file and truncating should work fine") {
+//                File file2("closed.h5", File::OpenMode::Truncate);
+//                file2["my_dataset"] = 12;
+//            }
         }
     }
 }

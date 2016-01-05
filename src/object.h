@@ -73,7 +73,7 @@ public:
 
 protected:
     void constructFromOther(const Object &other);
-    void close();
+    void closeObject();
 
     hid_t m_id = 0;
     hid_t m_parentID = 0;

@@ -67,8 +67,16 @@ Dataset& Dataset::operator=(const T &data)
     if(m_id == 0 && m_parentID > 0) {
         *this = Dataset::create(m_parentID, m_name, data);
     } else {
+        if(!isValid()) {
+            throw(std::runtime_error("Assigning value to invalid dataset object"));
+            return *this;
+        }
         int targetDimensions = TypeHelper<T>::dimensionCount();
         hid_t dataspace = H5Dget_space(m_id);
+        if(dataspace < 1) {
+            DLOG(ERROR) << "Could not create dataspace object " << *this;
+            return *this;
+        }
         int currentDimensions = H5Sget_simple_extent_ndims(dataspace);
 
         std::vector<hsize_t> extents(currentDimensions);
@@ -87,7 +95,7 @@ Dataset& Dataset::operator=(const T &data)
                           << "up by the old dataset." << std::endl;
             //#endif
             H5Sclose(dataspace);
-            close();
+            closeObject();
             H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
             *this = Dataset::create(m_parentID, m_name, data);
         } else {
@@ -140,14 +148,18 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const arma::Gen
 template<typename T>
 inline Dataset::operator T()
 {
+    if(!isValid()) {
+        throw(std::runtime_error("Fetching value from invalid dataset object"));
+        return T();
+    }
     DLOG(INFO) << "Getting dataspace for " << m_id;
     hid_t dataspace = H5Dget_space(m_id);
     int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
     DLOG(INFO) << "Dimensions are " << dimensionCount;
 
     if(dimensionCount != TypeHelper<T>::dimensionCount()) {
-        std::cerr << "ERROR: Tried to copy dataspace with "
-                  << dimensionCount << " dimensions to type T" << std::endl; // TODO: Use demangle and friends
+        DLOG(ERROR) << "Tried to copy dataspace with " << dimensionCount << " dimensions to type T";
+        // TODO: Use demangle and friends
         return T();
     }
 
