@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 #include <iostream>
-#include <glog/logging.h>
 #include <vector>
 
 using namespace std;

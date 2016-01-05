@@ -6,31 +6,7 @@
 using namespace h5cpp;
 using namespace arma;
 
-SCENARIO("Continuing work on a closed file", "[!hide]") {
-    GIVEN("a truncated file") {
-        File file("closed.h5", File::OpenMode::Truncate);
-        WHEN("we assign a few objects and close the file") {
-            Group group = file.createGroup("my_group");
-            group["my_dataset"] = 24;
-            group.attribute("my_attribute") = 12.1;
-            Dataset dataset = group["my_dataset"];
-            Attribute attribute = group.attribute("my_attribute");
-            file.close();
-            THEN("the objects should still cout fine") {
-                REQUIRE_NOTHROW(cout << dataset << endl);
-                REQUIRE_NOTHROW(cout << attribute << endl);
-            }
-            THEN("the objects should throw on access") {
-                REQUIRE_THROWS(int i = group["my_dataset"]);
-                REQUIRE_THROWS(double d = group.attribute("my_attribute"));
-            }
-//            THEN("re-opening the file and truncating should work fine") {
-//                File file2("closed.h5", File::OpenMode::Truncate);
-//                file2["my_dataset"] = 12;
-//            }
-        }
-    }
-}
+
 
 //TEST_CASE("Testing stuff", "[stuff]"){
 //    cerr << "=======" << endl;

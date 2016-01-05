@@ -14,7 +14,8 @@ SOURCES += \
     file.cpp \
     group.cpp \
     object.cpp \
-    attribute.cpp
+    attribute.cpp \
+    errorhelper.cpp
 
 HEADERS += \
     dataset.h \
@@ -34,7 +35,8 @@ HEADERS += \
     converters/native-converters.h \
     converters/armadillo-converters.h \
     h5cpp/Attribute \
-    converters/std-converters.h
+    converters/std-converters.h \
+    errorhelper.h
 
 release {
     !debug {

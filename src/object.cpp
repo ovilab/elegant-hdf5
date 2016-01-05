@@ -33,7 +33,7 @@ Object::Object(const Object &other, Object::CopyMode mode)
 //    , m_name(move(other.m_name))
 //{
 //#ifdef H5CPP_VERBOSE
-//    DLOG(INFO) << "Move constructor object " << m_id;
+//    DVLOG(1) << "Move constructor object " << m_id;
 //#endif
 //    other.m_id = 0;
 //}
@@ -42,13 +42,13 @@ Object::Object(const Object &other, Object::CopyMode mode)
 //{
 //    if(m_id > 0 && other.id() > 0) {
 //        if(type() == Type::Dataset && other.type() == Type::Dataset) {
-//            DLOG(INFO) << "We could copy, but it's not yet implemented";
+//            DVLOG(1) << "We could copy, but it's not yet implemented";
 //        } else {
 
 //        }
 //    }
 //#ifdef H5CPP_VERBOSE
-//    DLOG(INFO) << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")";
+//    DVLOG(1) << "Move assignment of object " << other.m_id << " (overwriting " << m_id << ")";
 //#endif
 //    swap(m_id, other.m_id); // Swap to make sure our id is cleaned up by other
 //    m_parentID = move(other.m_parentID);
@@ -63,16 +63,22 @@ Object &Object::operator=(const Object &other)
 
     bool isSame = (m_name == other.name() && m_parentID == other.parentID());
     if(isSame) {
-        DLOG(INFO) << "Is the same object";
+        DVLOG(1) << "Is the same object";
         return *this;
     } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
-        closeObject();
+        close();
         if(copyFromExistingToExisting) {
             H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
         }
-        H5Ocopy(other.parentID(), other.name().c_str(),
+        herr_t error = H5Ocopy(other.parentID(), other.name().c_str(),
                 m_parentID, m_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+        if(error < 0) {
+            throw runtime_error("Could not copy object from other");
+        }
         m_id = H5Oopen(m_parentID, m_name.c_str(), H5P_DEFAULT);
+        if(m_id < 1) {
+            throw runtime_error("Could not open object");
+        }
         return *this;
     }
     constructFromOther(other);
@@ -95,30 +101,36 @@ Object &Object::operator =(const Group &other)
 
 void Object::constructFromOther(const Object &other)
 {
-    closeObject();
+    close();
     if(other.isValid()) {
         m_id = H5Oopen(other.id(), ".", H5P_DEFAULT);
-        DLOG(INFO) << "Opened other object " << other << " to " << m_id;
+        if(m_id < 1) {
+            throw runtime_error("Could not open object from other");
+        }
+        DVLOG(1) << "Opened other object " << other << " to " << m_id;
     } else {
         m_id = other.id();
-        DLOG(INFO) << "Copied other " << m_id;
+        DVLOG(1) << "Copied other " << m_id;
     }
     m_name = other.name();
     m_parentID = other.parentID();
 }
 
-void Object::closeObject()
+void Object::close()
 {
     if(m_id > 0) {
-        H5Oclose(m_id);
-        DLOG(INFO) << "Closing object " << m_id;
+        DVLOG(1) << "Closing object " << m_id;
+        herr_t error = H5Oclose(m_id);
+        if(error < 0) {
+            DVLOG(1) << "WARNING: Could not safely close object " << *this;
+        }
         m_id = 0;
     }
 }
 
 Object::~Object()
 {
-    closeObject();
+    close();
 }
 
 const std::string& Object::name() const

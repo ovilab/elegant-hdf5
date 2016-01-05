@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 #include <iostream>
-#include <glog/logging.h>
 
 using namespace std;
 using namespace h5cpp;

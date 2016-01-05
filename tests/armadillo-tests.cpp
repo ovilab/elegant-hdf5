@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 #include <iostream>
-#include <glog/logging.h>
 
 using namespace std;
 using namespace h5cpp;
@@ -16,12 +15,6 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
             file["my_colvec"] = c;
             THEN("the same should be read back") {
                 colvec cr = file["my_colvec"];;
-                vector<double> diff;
-
-                set_difference(c.begin(), c.end(), cr.begin(), cr.end(),
-                                    inserter(diff, diff.begin()));
-
-                REQUIRE(diff.size() == 0);
                 REQUIRE(0 == Approx(max(abs(c - cr))));
             }
         }

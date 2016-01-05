@@ -2,7 +2,6 @@
 
 #include <catch.hpp>
 #include <iostream>
-#include <glog/logging.h>
 
 using namespace std;
 using namespace h5cpp;
@@ -108,6 +107,35 @@ SCENARIO("opening file in read-write", "[readwrite]") {
                     int d = file.attribute("my_double");
                     REQUIRE(i == 91.4);
                     REQUIRE(d == 31);
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("Continuing work on a closed file", "[closedfile]") {
+    GIVEN("a truncated file") {
+        File file("closed.h5", File::OpenMode::Truncate);
+        WHEN("we assign a few objects and close the file") {
+            Group group = file.createGroup("my_group");
+            group["my_dataset"] = 24;
+            group.attribute("my_attribute") = 12.1;
+            Dataset dataset = group["my_dataset"];
+            Attribute attribute = group.attribute("my_attribute");
+            file.close();
+            THEN("the objects should still be accessible") {
+                REQUIRE_NOTHROW(int i = group["my_dataset"]);
+                REQUIRE_NOTHROW(double d = group.attribute("my_attribute"));
+            }
+            THEN("re-opening the file and truncating should not work") {
+                REQUIRE_THROWS(File file2("closed.h5", File::OpenMode::Truncate));
+            }
+            AND_WHEN("closing the groups, datasets and attributes") {
+                group.close();
+                attribute.close();
+                dataset.close();
+                THEN("opening the file should be ok") {
+                    REQUIRE_NOTHROW(File file2("closed.h5", File::OpenMode::Truncate));
                 }
             }
         }

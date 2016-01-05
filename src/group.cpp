@@ -27,13 +27,13 @@ Group::Group(const Group &other)
 //    : Object(move(other))
 //{
 //#ifdef H5CPP_VERBOSE
-//    DLOG(INFO) << "Move constructor group";
+//    DVLOG(1) << "Move constructor group";
 //#endif
 //}
 
 Group::~Group()
 {
-    closeObject();
+    close();
 }
 
 Group::Group(const Object &other)
@@ -68,7 +68,7 @@ Group::Group(hid_t id, hid_t parentID, string name)
 vector<string> Group::keys() const
 {
     if(!isValid()) {
-        DLOG(ERROR) << "Object is not valid. Cannot request list of keys. " << *this;
+        DVLOG(1) << "Object is not valid. Cannot request list of keys. " << *this;
         return vector<string>();
     }
     vector<string> returnedKeys;
@@ -107,7 +107,7 @@ Object Group::item(string key) const
         return Object(0, m_id, key);
     }
     hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
-    DLOG(INFO) << "Open object " << key << " as " << id;
+    DVLOG(1) << "Open object " << key << " as " << id;
     return Object(id, m_id, key);
 }
 
@@ -191,7 +191,7 @@ Group Group::createGroup(string name)
     }
     if(hasKey(name)) {
         if(item(name).type() == Type::Group) {
-            DLOG(WARNING) << "WARNING: Group already exists with name " << name;
+            DVLOG(1) << "WARNING: Group already exists with name " << name;
         } else {
             throw(std::runtime_error("Cannot create group. A non-group object already exists with that name."));
         }
@@ -202,7 +202,10 @@ Group Group::createGroup(string name)
         createGroup(parentPathName);
     }
     hid_t groupID = H5Gcreate(m_id, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    DLOG(INFO) << "Created group with id " << groupID;
+    if(groupID < 1) {
+        throw runtime_error("Could not create group");
+    }
+    DVLOG(1) << "Created group with id " << groupID;
     return Group(groupID, m_id, name);
 }
 

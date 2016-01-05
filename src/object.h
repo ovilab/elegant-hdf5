@@ -2,12 +2,15 @@
 #define TEMP_H
 
 #include "logging.h"
+#include "demangle.h"
 //#include "dataset.h"
 
 #include <hdf5.h>
 #include <string>
 #include <armadillo>
 #include <iostream>
+#include <sstream>
+#include <typeinfo>
 
 namespace h5cpp {
 //class Object;
@@ -71,9 +74,10 @@ public:
     static H5I_type_t toHdf5Type(Object::Type hType);
     hid_t parentID() const;
 
+    void close();
+
 protected:
     void constructFromOther(const Object &other);
-    void closeObject();
 
     hid_t m_id = 0;
     hid_t m_parentID = 0;
@@ -85,7 +89,9 @@ private:
 template<typename T>
 Object::operator T() {
     if(type() != Type::Dataset) {
-        DLOG(ERROR) << "Tried to convert non-dataset object to other T"; // TODO: Add demangle and friends
+        std::stringstream errorStream;
+        errorStream << "Tried to convert non-dataset object to " << demangle(typeid(T).name());
+        throw std::runtime_error(errorStream.str());
     }
     Dataset dataset = *this;
     return dataset;

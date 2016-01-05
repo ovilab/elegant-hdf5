@@ -30,6 +30,8 @@ public:
     template<typename T>
     Dataset& operator=(const T &data);
 
+    std::vector<hsize_t> extents() const;
+
     template<typename T>
     static Dataset create(hid_t parentID, const std::string &name, const T &data);
 
@@ -39,6 +41,8 @@ public:
 
     template<typename T>
     operator T();
+private:
+    std::vector<hsize_t> extents(hid_t dataspace) const;
 };
 
 template<>
@@ -49,8 +53,8 @@ inline Object::operator Dataset() {
 template<typename T>
 inline void Object::operator=(const T& matrix)
 {
-    DLOG(INFO) << "Assignment operator of T";
-    DLOG(INFO) << "Is valid: " << isValid();
+    DVLOG(1) << "Assignment operator of T";
+    DVLOG(1) << "Is valid: " << isValid();
     if(isValid()) {
         Dataset dataset = *this;
         dataset = matrix;
@@ -62,8 +66,8 @@ inline void Object::operator=(const T& matrix)
 template<typename T>
 Dataset& Dataset::operator=(const T &data)
 {
-    DLOG(INFO) << "Dataset assignment operator of T type: " << typeid(T).name();
-    DLOG(INFO) << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id;
+    DVLOG(1) << "Dataset assignment operator of T type: " << typeid(T).name();
+    DVLOG(1) << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id;
     if(m_id == 0 && m_parentID > 0) {
         *this = Dataset::create(m_parentID, m_name, data);
     } else {
@@ -74,38 +78,38 @@ Dataset& Dataset::operator=(const T &data)
         int targetDimensions = TypeHelper<T>::dimensionCount();
         hid_t dataspace = H5Dget_space(m_id);
         if(dataspace < 1) {
-            DLOG(ERROR) << "Could not create dataspace object " << *this;
+            throw std::runtime_error("Could not get dataspace");
             return *this;
         }
-        int currentDimensions = H5Sget_simple_extent_ndims(dataspace);
-
-        std::vector<hsize_t> extents(currentDimensions);
-        H5Sget_simple_extent_dims(dataspace, &extents[0], NULL);
-
+        std::vector<hsize_t> extent = extents(dataspace);
+        int currentDimensions = extent.size();
         bool shouldOverwrite = false;
-        if(currentDimensions != targetDimensions || !TypeHelper<T>::matchingExtents(data, extents)) {
+        if(currentDimensions != targetDimensions || !TypeHelper<T>::matchingExtents(data, extent)) {
             shouldOverwrite = true;
         }
 
         if(shouldOverwrite) {
-            //#ifdef H5CPP_VERBOSE
-            FLAGS_stderrthreshold = 1;
-            DLOG(WARNING) << "Writing over dataset of different shape. "
-                          << "Limitations in HDF5 standard makes it impossible to free space taken "
-                          << "up by the old dataset." << std::endl;
-            //#endif
-            H5Sclose(dataspace);
-            closeObject();
-            H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
+            DVLOG(1) << "WARNING: Writing over dataset of different shape. "
+                     << "Limitations in HDF5 standard makes it impossible to free space taken "
+                     << "up by the old dataset.";
+            herr_t closeError = H5Sclose(dataspace);
+            if(closeError < 0) {
+                throw std::runtime_error("Could not close dataspace");
+            }
+            close();
+            herr_t deleteError = H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
+            if(deleteError < 0) {
+                throw std::runtime_error("Could not delete old dataset");
+            }
             *this = Dataset::create(m_parentID, m_name, data);
         } else {
-            DLOG(INFO) << "Writing to old dataset";
+            DVLOG(1) << "Writing to old dataset";
             hid_t datatype = TypeHelper<T>::hdfType();
             TypeHelper<T> temporary;
             herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
             H5Sclose(dataspace);
             if(errors < 0) {
-                DLOG(INFO) << "Error writing to dataset!";
+                DVLOG(1) << "Error writing to dataset!";
             }
         }
     }
@@ -115,10 +119,10 @@ Dataset& Dataset::operator=(const T &data)
 template<typename T>
 Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
 {
-    DLOG(INFO) << "Creating dataset on parent " << parentID << " with name " << name;
+    DVLOG(1) << "Creating dataset on parent " << parentID << " with name " << name;
     int targetDimensions = TypeHelper<T>::dimensionCount();
     std::vector<hsize_t> extents = TypeHelper<T>::extentsFromType(data);
-    DLOG(INFO) << "Extents: " << extents[0] << " "
+    DVLOG(1) << "Extents: " << extents[0] << " "
                << (targetDimensions > 1 ? extents[1] : 0) << " "
                << (targetDimensions > 2 ? extents[2] : 0);
 
@@ -132,7 +136,7 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
         herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
         if(errors >= 0) {
             H5Sclose(dataspace);
-            DLOG(INFO) << "Returning the created dataset " << dataset;
+            DVLOG(1) << "Returning the created dataset " << dataset;
             return Dataset(dataset, parentID, name);
         }
     };
@@ -149,31 +153,25 @@ template<typename T>
 inline Dataset::operator T()
 {
     if(!isValid()) {
-        throw(std::runtime_error("Fetching value from invalid dataset object"));
-        return T();
+        throw(std::runtime_error("Could not fetch value from invalid dataset object"));
     }
-    DLOG(INFO) << "Getting dataspace for " << m_id;
-    hid_t dataspace = H5Dget_space(m_id);
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
-    DLOG(INFO) << "Dimensions are " << dimensionCount;
-
+    DVLOG(1) << "Getting dataspace for " << m_id;
+    std::vector<hsize_t> extent = extents();
+    int dimensionCount = extent.size();
     if(dimensionCount != TypeHelper<T>::dimensionCount()) {
-        DLOG(ERROR) << "Tried to copy dataspace with " << dimensionCount << " dimensions to type T";
-        // TODO: Use demangle and friends
-        return T();
+        std::stringstream errorStream;
+        errorStream << "Tried to copy dataspace with " << dimensionCount
+                    << " dimensions to type " << demangle(typeid(T).name());
+        throw std::runtime_error(errorStream.str());
     }
 
-    std::vector<hsize_t> extents(dimensionCount);
-    H5Sget_simple_extent_dims(dataspace, &extents[0], NULL);
-    DLOG(INFO) << "Got extents:";
-    for(int i = 0; i < dimensionCount; i++) {
-        DLOG(INFO) << extents[i];
-    }
-
-    T object = TypeHelper<T>::objectFromExtents(extents);
+    T object = TypeHelper<T>::objectFromExtents(extent);
 
     hid_t hdf5Datatype = TypeHelper<T>::hdfType();
-    H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writeBuffer(object));
+    herr_t readError = H5Dread(m_id, hdf5Datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writeBuffer(object));
+    if(readError < 0) {
+        throw std::runtime_error("Could not read dataset");
+    }
     return object;
 }
 

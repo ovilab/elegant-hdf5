@@ -8,7 +8,6 @@ INCLUDEPATH += ../libs/Catch/include
 
 LIBS += -lhdf5_cpp -lhdf5_serial
 LIBS += -L../src/ -lh5cpp
-LIBS += -lglog
 
 #include(../library_deployment.pri)
 
@@ -22,10 +21,11 @@ SOURCES += \
     file-tests.cpp \
     group-tests.cpp \
     std-tests.cpp \
-    sandbox-tests.cpp
+    sandbox-tests.cpp \
+    dataset-tests.cpp
 
-release {
-    !debug {
-        DEFINES += NDEBUG
-    }
+CONFIG(debug, debug|release) {
+    DEFINES += H5CPP_USE_GLOG
+    LIBS += -lglog
+} else {
 }

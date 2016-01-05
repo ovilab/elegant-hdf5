@@ -33,6 +33,7 @@ public:
     hid_t id() const;
     hid_t parentID() const;
     std::string name() const;
+    void close();
 
     template<typename T>
     operator T() const;
@@ -44,7 +45,6 @@ private:
     hid_t m_parentID = 0;
     std::string m_name;
     void constructFromOther(const Attribute &other);
-    void close();
 };
 
 template<typename T>
@@ -52,12 +52,12 @@ Attribute::operator T() const
 {
     T value{};
     if(m_id == 0) {
-        DLOG(INFO) << "ERROR: Attempted use of undefined attribute '" << m_name << "'.";
+        DVLOG(1) << "ERROR: Attempted use of undefined attribute '" << m_name << "'.";
         return value;
     }
     hid_t datatype = TypeHelper<T>::hdfType();
     if(datatype < 1) {
-        DLOG(INFO) << "ERROR: Unknown conversion of attribute.";
+        DVLOG(1) << "ERROR: Unknown conversion of attribute.";
         return value;
     }
     H5Aread(m_id, datatype, &value);
@@ -70,7 +70,7 @@ void Attribute::operator=(const T &other)
 {
     hid_t datatype = TypeHelper<T>::hdfType();
     if(datatype < 1) {
-        DLOG(INFO) << "ERROR: Cannot convert unknown type to attribute";
+        DVLOG(1) << "ERROR: Cannot convert unknown type to attribute";
         return;
     }
     hsize_t dims[1];
@@ -83,7 +83,7 @@ void Attribute::operator=(const T &other)
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(m_id, datatype, &other);
     H5Sclose(dataspace);
-    DLOG(INFO) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
+    DVLOG(1) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 
 }
