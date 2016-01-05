@@ -9,8 +9,6 @@ INCLUDEPATH += ../libs/Catch/include
 LIBS += -lhdf5_cpp -lhdf5_serial
 LIBS += -L../src/ -lh5cpp
 
-#include(../library_deployment.pri)
-
 INCLUDEPATH += ../src
 LIBS += -lh5cpp -L../src
 

@@ -3,7 +3,6 @@
 #include "../src/dataset.h"
 #include "../src/attribute.h"
 
-//#define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
 
