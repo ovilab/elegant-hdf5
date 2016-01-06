@@ -9,8 +9,15 @@ namespace h5cpp {
 
 template<typename eT>
 struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
-    static hid_t hdfType() { return TypeHelper<eT>::hdfType(); }
-    static int dimensionCount() { return 1; }
+    static hid_t hdfType() {
+        return TypeHelper<eT>::hdfType();
+    }
+    static int dimensionCount() {
+        return 1;
+    }
+    static H5S_class_t dataspaceType() {
+        return H5S_SIMPLE;
+    }
     static std::vector<eT> objectFromExtents(const std::vector<hsize_t> &extents)
     {
         return std::vector<eT>(extents[0]);
@@ -26,10 +33,10 @@ struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
         }
         return false;
     }
-    static void* writeBuffer(std::vector<eT>& object) {
+    static void* writableBuffer(std::vector<eT>& object) {
         return &object[0];
     }
-    const void* readBuffer(const std::vector<eT>& object) {
+    const void* readableBuffer(const std::vector<eT>& object) {
         return &object[0];
     }
 };

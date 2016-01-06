@@ -39,25 +39,6 @@ Attribute::Attribute(const Attribute &other)
     constructFromOther(other);
 }
 
-Attribute &Attribute::operator=(const string &value)
-{
-    if(m_id != 0) {
-        close();
-        H5Adelete(m_parentID, m_name.c_str());
-    }
-
-    hid_t dataspace  = H5Screate(H5S_SCALAR);
-    hid_t datatype = H5Tcopy(H5T_C_S1);
-    H5Tset_size(datatype, value.size());
-    H5Tset_strpad(datatype, H5T_STR_NULLTERM);
-
-    m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Awrite(m_id, datatype, value.c_str());
-    H5Sclose(dataspace);
-    return *this;
-}
-
 Attribute &Attribute::operator=(const Attribute &other)
 {
     bool copyFromExistingToExisting = isValid() && other.isValid();
@@ -193,7 +174,7 @@ vector<hsize_t> Attribute::extents(hid_t dataspace) const
     return extents;
 }
 
-h5cpp::Attribute::operator std::string() const
+h5cpp::Attribute::operator string() const
 {
     if(m_id == 0) {
         return std::string();
@@ -230,6 +211,25 @@ h5cpp::Attribute::operator std::string() const
         H5free_memory(stringArray);
     }
     return value;
+}
+
+Attribute &Attribute::operator=(const string &value)
+{
+    if(m_id != 0) {
+        close();
+        H5Adelete(m_parentID, m_name.c_str());
+    }
+
+    hid_t dataspace  = H5Screate(H5S_SCALAR);
+    hid_t datatype = H5Tcopy(H5T_C_S1);
+    H5Tset_size(datatype, value.size());
+    H5Tset_strpad(datatype, H5T_STR_NULLTERM);
+
+    m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(m_id, datatype, value.c_str());
+    H5Sclose(dataspace);
+    return *this;
 }
 
 }

@@ -70,7 +70,7 @@ Attribute::operator T() const
     }
     T value = TypeHelper<T>::objectFromExtents(extent);
     hid_t datatype = TypeHelper<T>::hdfType();
-    herr_t readError = H5Aread(m_id, datatype, TypeHelper<T>::writeBuffer(value));
+    herr_t readError = H5Aread(m_id, datatype, TypeHelper<T>::writableBuffer(value));
     if(readError < 0) {
         throw std::runtime_error("Could not read attribute");
     }
@@ -86,13 +86,17 @@ void Attribute::operator=(const T &other)
         close();
         H5Adelete(m_parentID, m_name.c_str());
     }
-    hid_t dataspace = H5Screate_simple(extents.size(), &extents[0], NULL);
+    H5S_class_t dataspaceType = TypeHelper<T>::dataspaceType();
+    hid_t dataspace = H5Screate(dataspaceType);
+    if(dataspaceType == H5S_SIMPLE) {
+        H5Sset_extent_simple(dataspace, extents.size(), &extents[0], NULL);
+    }
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     if(m_id < 1) {
         throw std::runtime_error("Could not create attribute");
     }
     TypeHelper<T> temporary;
-    herr_t writeError = H5Awrite(m_id, datatype, temporary.readBuffer(other));
+    herr_t writeError = H5Awrite(m_id, datatype, temporary.readableBuffer(other));
     if(writeError < 0) {
         throw std::runtime_error("Could not write attribute");
     }

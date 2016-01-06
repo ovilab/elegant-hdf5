@@ -3,10 +3,40 @@
 #include <h5cpp/h5cpp>
 #include <armadillo>
 
+using namespace std;
 using namespace h5cpp;
 using namespace arma;
 
-
+SCENARIO("Sandbox tests", "[sandbox]") {
+    GIVEN("a truncated file") {
+        File file("sandbox.h5", File::OpenMode::Truncate);
+        WHEN("a double is written") {
+            double number = 23.4;
+            file.attribute("some_number") = number;
+            THEN("the same number should be read") {
+                double readNumber = file.attribute("some_number");
+                REQUIRE(number == readNumber);
+            }
+        }
+        WHEN("a matrix is written") {
+            mat A = ones(4,3);
+            file.attribute("some_mat") = A;
+            THEN("the same matrix should be read") {
+                mat B = file.attribute("some_mat");
+//                cout << A << endl;
+//                cout << B << endl;
+            }
+        }
+        WHEN("a string is written") {
+            string bla = "blablabla";
+            file.attribute("some_string") = bla;
+            THEN("the same number should be read") {
+                string readString = file.attribute("some_string");
+                REQUIRE(bla == readString);
+            }
+        }
+    }
+}
 
 //TEST_CASE("Testing stuff", "[stuff]"){
 //    cerr << "=======" << endl;

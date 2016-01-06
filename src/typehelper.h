@@ -18,17 +18,20 @@ struct SimpleTypeHelper
     static hid_t hdfType() {
         return 0;
     }
+    static H5S_class_t dataspaceType() {
+        return H5S_SCALAR;
+    }
     static int dimensionCount() {
-        return 1;
+        return 0;
     }
     static T objectFromExtents(const std::vector<hsize_t> &extents) {
         (void)extents;
         return T();
     }
-    static void* writeBuffer(T& object) {
+    static void* writableBuffer(T& object) {
         return &object;
     }
-    const void* readBuffer(const T& object) {
+    const void* readableBuffer(const T& object) {
         return &object;
     }
     static bool matchingExtents(const T &object, const std::vector<hsize_t> &extents) {
@@ -40,9 +43,7 @@ struct SimpleTypeHelper
     }
     static std::vector<hsize_t> extentsFromType(const T &object) {
         (void)object;
-        std::vector<hsize_t> extents(1);
-        extents[0] = 1;
-        return extents;
+        return std::vector<hsize_t>();
     }
 };
 

@@ -107,7 +107,7 @@ Dataset& Dataset::operator=(const T &data)
             DVLOG(1) << "Writing to old dataset";
             hid_t datatype = TypeHelper<T>::hdfType();
             TypeHelper<T> temporary;
-            herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
+            herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readableBuffer(data));
             H5Sclose(dataspace);
             if(errors < 0) {
                 DVLOG(1) << "Error writing to dataset!";
@@ -121,13 +121,13 @@ template<typename T>
 Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
 {
     DVLOG(1) << "Creating dataset on parent " << parentID << " with name " << name;
-    int targetDimensions = TypeHelper<T>::dimensionCount();
     std::vector<hsize_t> extents = TypeHelper<T>::extentsFromType(data);
-    DVLOG(1) << "Extents: " << extents[0] << " "
-               << (targetDimensions > 1 ? extents[1] : 0) << " "
-               << (targetDimensions > 2 ? extents[2] : 0);
 
-    hid_t dataspace = H5Screate_simple(targetDimensions, &extents[0], NULL);
+    H5S_class_t dataspaceType = TypeHelper<T>::dataspaceType();
+    hid_t dataspace = H5Screate(dataspaceType);
+    if(dataspaceType == H5S_SIMPLE) {
+        H5Sset_extent_simple(dataspace, extents.size(), &extents[0], NULL);
+    }
     hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
     hid_t datatype = TypeHelper<T>::hdfType();
     hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
@@ -136,7 +136,7 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
         throw std::runtime_error("Could not create dataset");
     }
     TypeHelper<T> temporary;
-    herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readBuffer(data));
+    herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readableBuffer(data));
     H5Sclose(dataspace);
     if(errors < 0) {
         throw std::runtime_error("Could not write dataset");
@@ -164,7 +164,7 @@ inline Dataset::operator T()
     T object = TypeHelper<T>::objectFromExtents(extent);
 
     hid_t datatype = TypeHelper<T>::hdfType();
-    herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writeBuffer(object));
+    herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writableBuffer(object));
     if(readError < 0) {
         throw std::runtime_error("Could not read dataset");
     }
