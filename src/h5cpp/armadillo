@@ -1,7 +1,7 @@
-#ifndef ARMADILLO
-#define ARMADILLO
+#ifndef H5CPP_ARMADILLO_H
+#define H5CPP_ARMADILLO_H
 
 #include "../converters/armadillo-converters.h"
 
-#endif // ARMADILLO
+#endif // H5CPP_ARMADILLO_H
 

@@ -5,6 +5,12 @@
 #include "typehelper.h"
 #include "logging.h"
 #include "demangle.h"
+#include "converters/native-converters.h"
+#include "converters/std-converters.h"
+
+#ifndef H5CPP_NO_ARMA
+#include "converters/armadillo-converters.h"
+#endif
 
 #include <iostream>
 #include <typeinfo>
