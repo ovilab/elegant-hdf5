@@ -33,9 +33,6 @@ public:
     Object item(std::string key) const;
     Object operator[](std::string key) const;
 
-    template<typename T>
-    Dataset createDataset(std::string name, arma::Mat<T> data);
-
     Group createGroup(std::string name);
 
     bool hasKey(std::string name) const;
@@ -48,12 +45,6 @@ public:
 private:
     Group(hid_t id, hid_t parentID, std::string name);
 };
-
-template<typename T>
-Dataset Group::createDataset(std::string name, arma::Mat<T> data)
-{
-    return Dataset::create(m_id, name, data);
-}
 
 template<>
 inline Object::operator Group() {

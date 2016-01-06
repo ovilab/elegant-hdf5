@@ -6,7 +6,7 @@
 #include <hdf5.h>
 #include <string>
 #include <type_traits>
-#include <armadillo>
+#include <vector>
 
 namespace h5cpp {
 

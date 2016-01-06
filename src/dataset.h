@@ -6,7 +6,6 @@
 #include "logging.h"
 #include "demangle.h"
 
-#include <armadillo>
 #include <iostream>
 #include <typeinfo>
 
@@ -34,10 +33,6 @@ public:
 
     template<typename T>
     static Dataset create(hid_t parentID, const std::string &name, const T &data);
-
-    // TODO: Support other types of rvalues, such as eOP
-    template<typename T, typename U>
-    static Dataset create(hid_t parentID, const std::string &name, const arma::Gen<T, U> &data);
 
     template<typename T>
     operator T();
@@ -141,12 +136,6 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
         }
     };
     return Dataset(0, 0, name);
-}
-
-template<typename T, typename U>
-Dataset Dataset::create(hid_t parentID, const std::string &name, const arma::Gen<T, U> &data) {
-    T dataReal = data;
-    return create(parentID, name, dataReal);
 }
 
 template<typename T>

@@ -7,7 +7,6 @@
 
 #include <hdf5.h>
 #include <string>
-#include <armadillo>
 #include <iostream>
 #include <sstream>
 #include <typeinfo>

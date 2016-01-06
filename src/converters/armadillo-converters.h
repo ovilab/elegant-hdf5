@@ -120,52 +120,57 @@ struct TypeHelper<arma::Cube<eT>> : public SimpleTypeHelper<arma::Cube<eT>> {
 
 template<typename T, typename op>
 struct TypeHelper<arma::Gen<T, op>> : public SimpleTypeHelper<arma::Gen<T, op>> {
+    typedef typename arma::Gen<T, op> object_type;
+
     static hid_t hdfType(){ return TypeHelper<T>::hdfType(); }
     static int dimensionCount() { return TypeHelper<T>::dimensionCount(); }
     static T objectFromExtents(const std::vector<hsize_t> &extents) {
         return TypeHelper<T>::objectFromExtents(extents);
     }
-    static bool matchingExtents(const arma::Gen<T, op> &v, const std::vector<hsize_t> &extents) {
+    static bool matchingExtents(const object_type &v, const std::vector<hsize_t> &extents) {
         return TypeHelper<T>::matchingExtents(v, extents);
     }
-    static std::vector<hsize_t> extentsFromType(const arma::Gen<T, op> &v) {
+    static std::vector<hsize_t> extentsFromType(const object_type &v) {
         return TypeHelper<T>::extentsFromType(v);
     }
-    static void* writeBuffer(arma::Gen<T, op> &object) {
+    static void* writeBuffer(object_type &object) {
         return TypeHelper<T>::writeBuffer(object);
     }
-    const void* readBuffer(const arma::Gen<T, op> &object) {
-        return TypeHelper<T>().readBuffer(object);
+    const void* readBuffer(const object_type &object) {
+        temporaryReadableMemory = object;
+        return TypeHelper<T>().readBuffer(temporaryReadableMemory);
     }
+
+    T temporaryReadableMemory;
 };
 
 template<typename T, typename U, typename op>
 struct TypeHelper<arma::eGlue<T, U, op>> : public SimpleTypeHelper<arma::eGlue<T, U, op>> {
     typedef typename arma::eGlue<T, U, op> object_type;
-    typedef typename arma::eGlue<T, U, op>::proxy1_type::stored_type arma_type;
-    // TODO what if result has different type?
+
 
     static hid_t hdfType(){
-        return TypeHelper<arma_type>::hdfType();
+        return TypeHelper<T>::hdfType();
     }
     static int dimensionCount() {
-        return TypeHelper<arma_type>::dimensionCount();
+        return TypeHelper<T>::dimensionCount();
     }
     static T objectFromExtents(const std::vector<hsize_t> &extents) {
-        return TypeHelper<arma_type>::objectFromExtents(extents);
+        return TypeHelper<T>::objectFromExtents(extents);
     }
     static bool matchingExtents(const object_type &v, const std::vector<hsize_t> &extents) {
-        return TypeHelper<arma_type>::matchingExtents(v, extents);
+        return TypeHelper<T>::matchingExtents(v, extents);
     }
     static std::vector<hsize_t> extentsFromType(const object_type &v) {
-        return TypeHelper<arma_type>::extentsFromType(v);
+        return TypeHelper<T>::extentsFromType(v);
     }
     const void* readBuffer(const object_type &object) {
+        // TODO what if result has different type than T (or U)
         temporaryReadableMemory = object;
-        return TypeHelper<arma_type>().readBuffer(temporaryReadableMemory);
+        return TypeHelper<T>().readBuffer(temporaryReadableMemory);
     }
 
-    arma_type temporaryReadableMemory;
+    T temporaryReadableMemory;
 };
 
 }
