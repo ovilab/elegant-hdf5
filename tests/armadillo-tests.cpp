@@ -36,6 +36,11 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 mat mar = file["my_mat"];
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
             }
+            THEN("the same should be read back after initialization") {
+                mat mar;
+                mar = file["my_mat"].value<mat>();
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+            }
         }
         WHEN("writing a couple of objects") {
             mat ma = ones(2, 4);

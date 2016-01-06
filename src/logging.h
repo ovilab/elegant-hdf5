@@ -1,14 +1,33 @@
 #ifndef H5CPP_LOGGING
 #define H5CPP_LOGGING
 
+#include <ostream>
+#include <iostream>
+
 #ifdef H5CPP_USE_GLOG
 
 #include <glog/logging.h>
 
 #else
 
-#define DLOG(severity) 0 && std::cout
-#define DVLOG(verboselevel) 0 && std::cout
+#ifndef H5CPP_DLL_EXPORT_FOR_WINDOWS
+# if defined(_WIN32) && !defined(__CYGWIN__)
+#   define H5CPP_DLL_EXPORT_FOR_WINDOWS  __declspec(dllimport)
+# else
+#   define H5CPP_DLL_EXPORT_FOR_WINDOWS
+# endif
+#endif
+
+namespace h5cpp {
+class H5CPP_DLL_EXPORT_FOR_WINDOWS DummyLog {
+ public:
+  DummyLog() { }
+  void operator&(std::ostream&) { }
+};
+}
+
+#define DLOG(severity) true ? (void)0 : h5cpp::DummyLog() & std::cout
+#define DVLOG(verboselevel) true ? (void)0 : h5cpp::DummyLog() & std::cout
 
 #endif
 

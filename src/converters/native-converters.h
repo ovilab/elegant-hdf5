@@ -72,7 +72,14 @@ struct TypeHelper<long double> : public SimpleTypeHelper<long double> {
 
 template<>
 struct TypeHelper<bool> : public SimpleTypeHelper<bool> {
-    static hid_t hdfType(){ return H5T_NATIVE_HBOOL; }
+    static hid_t hdfType() {
+        return H5T_NATIVE_INT;
+    }
+    const void* readableBuffer(const bool &object) {
+        value = object; // convert to int before storing because HDF5 1.8.x doesn't support bool
+        return &value;
+    }
+    int value;
 };
 
 }

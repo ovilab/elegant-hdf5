@@ -8,6 +8,18 @@ using namespace h5cpp;
 using namespace arma;
 
 SCENARIO("Sandbox tests", "[sandbox]") {
+//    GIVEN("tests") {
+////        File file("sandbox.h5", File::OpenMode::ReadWrite);
+//        File file("sandbox.h5", File::OpenMode::Truncate);
+////        file["lol"] = true;
+//        file["lol"] = 34.2;
+////        bool a = file["lol"];
+//        if(file["lol"]) {
+//            cout << "Yes" << endl;
+//        } else {
+//            cout << "No" << endl;
+//        }
+//    }
     GIVEN("a truncated file") {
         File file("sandbox.h5", File::OpenMode::Truncate);
         WHEN("a double is written") {
@@ -19,12 +31,16 @@ SCENARIO("Sandbox tests", "[sandbox]") {
             }
         }
         WHEN("a matrix is written") {
-            mat A = ones(4,3);
+            mat A = ones(2, 2);
             file.attribute("some_mat") = A;
+            file["matmat"] = A;
             THEN("the same matrix should be read") {
                 mat B = file.attribute("some_mat");
-//                cout << A << endl;
-//                cout << B << endl;
+                mat C = file["matmat"];
+                C = file["matmat"].value<mat>();
+                cout << A << endl;
+                cout << B << endl;
+                cout << C << endl;
             }
         }
         WHEN("a string is written") {

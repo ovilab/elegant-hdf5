@@ -41,13 +41,16 @@ public:
     static Dataset create(hid_t parentID, const std::string &name, const T &data);
 
     template<typename T>
-    operator T();
+    T value() const;
+
+    template<typename T>
+    operator T() const;
 private:
     std::vector<hsize_t> extents(hid_t dataspace) const;
 };
 
 template<>
-inline Object::operator Dataset() {
+inline Object::operator Dataset() const {
     return Dataset(*this);
 }
 
@@ -89,7 +92,6 @@ Dataset& Dataset::operator=(const T &data)
         if(currentDimensions != targetDimensions || !TypeHelper<T>::matchingExtents(data, extent)) {
             shouldOverwrite = true;
         }
-
         if(shouldOverwrite) {
             DVLOG(1) << "WARNING: Writing over dataset of different shape. "
                      << "Limitations in HDF5 standard makes it impossible to free space taken "
@@ -146,10 +148,17 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
     return Dataset(dataset, parentID, name);
 }
 
+
 template<typename T>
-inline Dataset::operator T()
+inline Dataset::operator T() const
 {
-    DVLOG(1) << "Reading dataset " << m_id << " " << m_name << " " << m_parentID;
+    return value<T>();
+}
+
+template<typename T>
+inline T Dataset::value() const
+{
+    DVLOG(1) << "Reading dataset " << m_id << " " << m_name << " " << m_parentID << " to type " << demangle(typeid(T).name());
     if(!isValid()) {
         throw(std::runtime_error("Could not fetch value from invalid dataset object"));
     }

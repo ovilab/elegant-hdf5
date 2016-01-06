@@ -62,7 +62,10 @@ public:
     hid_t id() const;
 
     template<typename T>
-    operator T();
+    operator T() const;
+
+    template<typename T>
+    T value() const;
 
     bool isValid() const;
     bool isDataset() const;
@@ -86,7 +89,8 @@ private:
 };
 
 template<typename T>
-Object::operator T() {
+T Object::value() const
+{
     if(type() != Type::Dataset) {
         std::stringstream errorStream;
         errorStream << "Tried to convert non-dataset object to " << demangle(typeid(T).name());
@@ -94,6 +98,12 @@ Object::operator T() {
     }
     Dataset dataset = *this;
     return dataset;
+}
+
+template<typename T>
+Object::operator T() const
+{
+    return value<T>();
 }
 
 }

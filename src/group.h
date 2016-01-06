@@ -47,7 +47,7 @@ private:
 };
 
 template<>
-inline Object::operator Group() {
+inline Object::operator Group() const {
     return Group(*this);
 }
 

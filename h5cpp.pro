@@ -1,4 +1,11 @@
 TEMPLATE = subdirs
-SUBDIRS += src tests
+SUBDIRS += src
 CONFIG += ordered
-tests.depends = src
+
+CONFIG(tests) {
+    message(Tests included)
+    SUBDIRS += tests
+    tests.depends = src
+} else {
+    message(Skipping tests)
+}
