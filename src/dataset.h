@@ -69,7 +69,8 @@ Dataset& Dataset::operator=(const T &data)
 {
     DVLOG(1) << "Dataset assignment operator of T type: " << typeid(T).name();
     DVLOG(1) << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id;
-    if(m_id == 0 && m_parentID > 0) {
+    bool doesNotExistYet = m_id == 0 && m_parentID > 0;
+    if(doesNotExistYet) {
         *this = Dataset::create(m_parentID, m_name, data);
     } else {
         if(!isValid()) {
@@ -148,10 +149,10 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
 template<typename T>
 inline Dataset::operator T()
 {
+    DVLOG(1) << "Reading dataset " << m_id << " " << m_name << " " << m_parentID;
     if(!isValid()) {
         throw(std::runtime_error("Could not fetch value from invalid dataset object"));
     }
-    DVLOG(1) << "Getting dataspace for " << m_id;
     std::vector<hsize_t> extent = extents();
     int dimensionCount = extent.size();
     if(dimensionCount != TypeHelper<T>::dimensionCount()) {
@@ -160,9 +161,7 @@ inline Dataset::operator T()
                     << " dimensions to type " << demangle(typeid(T).name());
         throw std::runtime_error(errorStream.str());
     }
-
     T object = TypeHelper<T>::objectFromExtents(extent);
-
     hid_t datatype = TypeHelper<T>::hdfType();
     herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writableBuffer(object));
     if(readError < 0) {
