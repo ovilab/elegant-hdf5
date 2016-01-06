@@ -41,7 +41,7 @@ File::File(string fileName, File::OpenMode mode)
             throw(runtime_error(error.str()));
         }
         DVLOG(1) << "with ID: " << m_id;
-    } else {
+    } else if(mode != OpenMode::ReadOnly) {
         m_id = H5Fcreate(fileName.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if(m_id < 1) {
             stringstream error;
@@ -50,6 +50,10 @@ File::File(string fileName, File::OpenMode mode)
             throw(runtime_error(error.str()));
         }
         DVLOG(1) << "in truncate/create mode with ID: " << m_id;
+    } else {
+        stringstream error;
+        error << "Could not open file '" << fileName << "'. OpenMode was ReadOnly.";
+        throw runtime_error(error.str());
     }
 }
 

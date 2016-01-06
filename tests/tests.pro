@@ -20,7 +20,8 @@ SOURCES += \
     group-tests.cpp \
     std-tests.cpp \
     sandbox-tests.cpp \
-    dataset-tests.cpp
+    dataset-tests.cpp \
+    armadillo-attribute-tests.cpp
 
 CONFIG(debug, debug|release) {
     DEFINES += H5CPP_USE_GLOG

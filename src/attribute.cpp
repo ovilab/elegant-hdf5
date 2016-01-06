@@ -41,11 +41,18 @@ Attribute::Attribute(const Attribute &other)
 
 Attribute &Attribute::operator=(const string &value)
 {
+    if(m_id != 0) {
+        close();
+        H5Adelete(m_parentID, m_name.c_str());
+    }
+
     hid_t dataspace  = H5Screate(H5S_SCALAR);
     hid_t datatype = H5Tcopy(H5T_C_S1);
     H5Tset_size(datatype, value.size());
     H5Tset_strpad(datatype, H5T_STR_NULLTERM);
+
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+
     H5Awrite(m_id, datatype, value.c_str());
     H5Sclose(dataspace);
     return *this;
@@ -69,7 +76,9 @@ Attribute &Attribute::operator=(const Attribute &other)
         hid_t otherDataspace = H5Aget_space(other.id());
         hid_t datatype = H5Aget_type(other.id());
         hid_t ourDataspace = H5Scopy(otherDataspace);
+
         m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, ourDataspace, H5P_DEFAULT, H5P_DEFAULT);
+
         hsize_t elementCount = H5Sget_simple_extent_npoints(otherDataspace);
         hsize_t typeSize = H5Tget_size(datatype);
         hsize_t size = typeSize * elementCount;
@@ -146,6 +155,42 @@ hid_t Attribute::parentID() const
 std::string Attribute::name() const
 {
     return m_name;
+}
+
+vector<hsize_t> Attribute::extents() const
+{
+    if(!isValid()) {
+        return vector<hsize_t>();
+    }
+    hid_t dataspace = H5Aget_space(m_id);
+    if(dataspace < 1) {
+        throw std::runtime_error("Could not get dataspace for dataset object");
+    }
+    vector<hsize_t> result = extents(dataspace);
+    herr_t closeError = H5Sclose(dataspace);
+    if(closeError < 0) {
+        throw std::runtime_error("Could not close dataspace");
+    }
+    return result;
+}
+
+vector<hsize_t> Attribute::extents(hid_t dataspace) const
+{
+    if(!isValid()) {
+        return vector<hsize_t>();
+    }
+    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
+    if(dimensionCount < 0) {
+        throw std::runtime_error("Could not get the number of dimensions for dataspace");
+    }
+    DVLOG(1) << "Dimensions are " << dimensionCount;
+
+    std::vector<hsize_t> extents(dimensionCount);
+    int error = H5Sget_simple_extent_dims(dataspace, &extents[0], NULL);
+    if(error < 0) {
+        throw std::runtime_error("Could not get the extents for dataspace");
+    }
+    return extents;
 }
 
 h5cpp::Attribute::operator std::string() const

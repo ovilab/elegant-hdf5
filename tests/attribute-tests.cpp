@@ -1,4 +1,5 @@
-#include "../src/h5cpp/h5cpp"
+#include "../src/h5cpp/Attribute"
+#include "../src/h5cpp/File"
 
 #include <catch.hpp>
 #include <iostream>
@@ -8,10 +9,14 @@ using namespace h5cpp;
 using namespace arma;
 
 SCENARIO("Reading and writing attributes", "[attributes]") {
-    GIVEN("a truncated file, an int and a float") {
-        File file("numeric-attributes.h5", File::OpenMode::Truncate);
+    GIVEN("a truncated file") {
+        File file("attributes.h5", File::OpenMode::Truncate);
+    }
+    GIVEN("a read-write file and some attributes") {
+        File file("attributes.h5");
         double number = 23.4;
         int otherNumber = 19;
+        string bla = "blablabla";
         WHEN("a double is written") {
             file.attribute("some_number") = number;
             THEN("the same number should be read") {
@@ -28,17 +33,13 @@ SCENARIO("Reading and writing attributes", "[attributes]") {
             }
             AND_WHEN("file is closed and opened read-only") {
                 file.close();
-                File readOnlyFile("numeric-attributes.h5", File::OpenMode::ReadOnly);
+                File readOnlyFile("attributes.h5", File::OpenMode::ReadOnly);
                 THEN("attribute should still be the same") {
                     int readNumber = readOnlyFile.attribute("some_number");
                     REQUIRE(readNumber == otherNumber);
                 }
             }
         }
-    }
-    GIVEN("a truncated file and some strings") {
-        File file("string-attributes.h5", File::OpenMode::Truncate);
-        string bla = "blablabla";
         WHEN("writing a string attribute") {
             file.attribute("some_string") = bla;
             THEN("the same attribute should be read back") {
