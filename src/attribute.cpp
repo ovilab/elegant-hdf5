@@ -174,7 +174,7 @@ vector<hsize_t> Attribute::extents(hid_t dataspace) const
     return extents;
 }
 
-h5cpp::Attribute::operator string() const
+std::string Attribute::toString() const
 {
     if(m_id == 0) {
         return std::string();

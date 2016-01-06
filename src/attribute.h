@@ -42,9 +42,16 @@ public:
     std::vector<hsize_t> extents(hid_t dataspace) const;
 
     template<typename T>
+    T value() const;
+
+    std::string toString() const;
+
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
+    template<typename T>
     operator T() const;
 
     operator std::string() const;
+#endif
 
 private:
     hid_t m_id = 0;
@@ -53,8 +60,27 @@ private:
     void constructFromOther(const Attribute &other);
 };
 
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<typename T>
 Attribute::operator T() const
+{
+    return value<T>();
+}
+
+inline Attribute::operator std::string() const
+{
+    return toString();
+}
+#endif
+
+template<>
+inline std::string Attribute::value<std::string>() const
+{
+    return toString();
+}
+
+template<typename T>
+T Attribute::value() const
 {
     DVLOG(1) << "Reading attribute " << m_id << " " << m_name << " " << m_parentID;
     if(m_id == 0) {

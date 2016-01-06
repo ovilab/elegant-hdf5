@@ -43,16 +43,20 @@ public:
     template<typename T>
     T value() const;
 
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
     template<typename T>
     operator T() const;
+#endif
 private:
     std::vector<hsize_t> extents(hid_t dataspace) const;
 };
 
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<>
 inline Object::operator Dataset() const {
     return Dataset(*this);
 }
+#endif
 
 template<typename T>
 inline void Object::operator=(const T& matrix)
@@ -148,11 +152,24 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
     return Dataset(dataset, parentID, name);
 }
 
-
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<typename T>
 inline Dataset::operator T() const
 {
     return value<T>();
+}
+#endif
+
+template<typename T>
+T Object::value() const
+{
+    if(type() != Type::Dataset) {
+        std::stringstream errorStream;
+        errorStream << "Tried to convert non-dataset object to " << demangle(typeid(T).name());
+        throw std::runtime_error(errorStream.str());
+    }
+    Dataset dataset = *this;
+    return dataset.value<T>();
 }
 
 template<typename T>

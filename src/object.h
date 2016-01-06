@@ -61,8 +61,10 @@ public:
     Type type() const;
     hid_t id() const;
 
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
     template<typename T>
     operator T() const;
+#endif
 
     template<typename T>
     T value() const;
@@ -88,23 +90,13 @@ protected:
 private:
 };
 
-template<typename T>
-T Object::value() const
-{
-    if(type() != Type::Dataset) {
-        std::stringstream errorStream;
-        errorStream << "Tried to convert non-dataset object to " << demangle(typeid(T).name());
-        throw std::runtime_error(errorStream.str());
-    }
-    Dataset dataset = *this;
-    return dataset;
-}
-
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<typename T>
 Object::operator T() const
 {
     return value<T>();
 }
+#endif
 
 }
 

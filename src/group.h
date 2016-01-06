@@ -46,10 +46,12 @@ private:
     Group(hid_t id, hid_t parentID, std::string name);
 };
 
+#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<>
 inline Object::operator Group() const {
     return Group(*this);
 }
+#endif
 
 }
 
