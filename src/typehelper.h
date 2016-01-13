@@ -42,6 +42,9 @@ struct SimpleTypeHelper
     }
     static bool matchingExtents(const T &object, const std::vector<hsize_t> &extents) {
         (void)object;
+        if(extents.size() < 1) {
+            return false;
+        }
         if(extents[0] != 1) {
             return false;
         }
