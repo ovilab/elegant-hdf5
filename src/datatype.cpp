@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+namespace h5cpp {
+
 Datatype::Datatype()
 {
 }
@@ -77,6 +79,19 @@ bool Datatype::isDouble() const
     }
 }
 
+Datatype::Type Datatype::type() const
+{
+    if(H5Tequal(m_id, H5T_NATIVE_INT)) {
+        return Type::Int;
+    } else if(H5Tequal(m_id, H5T_NATIVE_FLOAT)) {
+        return Type::Float;
+    } else if(H5Tequal(m_id, H5T_NATIVE_DOUBLE)) {
+        return Type::Double;
+    } else {
+        return Type::Unknown;
+    }
+}
+
 void Datatype::close()
 {
     if(m_id > 0) {
@@ -91,3 +106,5 @@ void Datatype::constructFromOther(const Datatype &other) {
         m_id = other.id();
     }
 }
+
+} // namespace

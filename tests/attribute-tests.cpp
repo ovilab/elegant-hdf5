@@ -55,4 +55,12 @@ SCENARIO("Reading and writing attributes", "[attributes]") {
             }
         }
     }
+    GIVEN("a truncated file") {
+        File file("attributes-trunc.h5", File::OpenMode::Truncate);
+        WHEN("an attribute of a non-existent group is accessed") {
+            THEN("the program should throw an exception") {
+                REQUIRE_THROWS_AS(file["nonexistentgroup"].attribute("some_number") = 85.6, std::runtime_error);
+            }
+        }
+    }
 }

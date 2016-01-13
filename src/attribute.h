@@ -39,7 +39,13 @@ public:
     std::string name() const;
     void close();
 
-    Datatype datatype() const;
+    Datatype::Type datatype() const;
+
+    // dataspace properties
+    bool isScalar() const;
+    bool isSimple() const;
+    int dimensionCount() const;
+    std::vector<hsize_t> extents() const;
 
     template<typename T>
     T value() const;
@@ -55,11 +61,11 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const Attribute&);
 
-    std::vector<hsize_t> extents() const;
 private:
     hid_t id() const;
     hid_t parentID() const;
     void constructFromOther(const Attribute &other);
+    Datatype datatype_impl() const;
     Dataspace dataspace() const;
 
     hid_t m_id = 0;
@@ -120,7 +126,7 @@ void Attribute::operator=(const T &other)
         H5Adelete(m_parentID, m_name.c_str());
     }
     H5S_class_t dataspaceType = TypeHelper<T>::dataspaceType();
-    hid_t dataspace = H5Screate(dataspaceType);
+    Dataspace dataspace(H5Screate(dataspaceType));
     if(dataspaceType == H5S_SIMPLE) {
         H5Sset_extent_simple(dataspace, extents.size(), &extents[0], NULL);
     }
@@ -133,7 +139,6 @@ void Attribute::operator=(const T &other)
     if(writeError < 0) {
         throw std::runtime_error("Could not write attribute");
     }
-    H5Sclose(dataspace);
     DVLOG(1) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 

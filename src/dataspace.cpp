@@ -58,6 +58,29 @@ int Dataspace::dimensionCount() const
     return result;
 }
 
+bool Dataspace::isScalar() const
+{
+    if(extentType() == H5S_SCALAR) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool Dataspace::isSimple() const
+{
+    if(extentType() == H5S_SIMPLE) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+H5S_class_t Dataspace::extentType() const
+{
+    return H5Sget_simple_extent_type(m_id);
+}
+
 hid_t Dataspace::id() const
 {
     return m_id;

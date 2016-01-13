@@ -55,7 +55,7 @@ Attribute &Attribute::operator=(const Attribute &other)
             H5Adelete(m_parentID, m_name.c_str());
         }
         Dataspace otherDataspace = other.dataspace();
-        Datatype datatype = other.datatype();
+        Datatype datatype = other.datatype_impl();
         Dataspace ourDataspace(H5Scopy(otherDataspace));
 
         m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, ourDataspace, H5P_DEFAULT, H5P_DEFAULT);
@@ -114,6 +114,11 @@ void Attribute::close()
     }
 }
 
+Datatype::Type Attribute::datatype() const
+{
+    return datatype_impl().type();
+}
+
 bool Attribute::isValid() const
 {
     DVLOG(1) << "Valid attribute: " << m_id << m_name << m_parentID;
@@ -135,14 +140,24 @@ hid_t Attribute::parentID() const
     return m_parentID;
 }
 
-Datatype Attribute::datatype() const
+Datatype Attribute::datatype_impl() const
 {
     return Datatype(H5Aget_type(m_id));
 }
 
-std::string Attribute::name() const
+bool Attribute::isScalar() const
 {
-    return m_name;
+    return dataspace().isScalar();
+}
+
+bool Attribute::isSimple() const
+{
+    return dataspace().isSimple();
+}
+
+int Attribute::dimensionCount() const
+{
+    return dataspace().dimensionCount();
 }
 
 vector<hsize_t> Attribute::extents() const
@@ -150,12 +165,17 @@ vector<hsize_t> Attribute::extents() const
     return dataspace().extents();
 }
 
+std::string Attribute::name() const
+{
+    return m_name;
+}
+
 std::string Attribute::toString() const
 {
     if(m_id == 0) {
         return std::string();
     }
-    Datatype attributeType = datatype();
+    Datatype attributeType = datatype_impl();
     hid_t typeClass = H5Tget_class(attributeType);
     if (typeClass != H5T_STRING) {
         DVLOG(1) << "ERROR: Trying to output non-string type to string. This is not yet supported.";
@@ -196,15 +216,14 @@ Attribute &Attribute::operator=(const string &value)
         H5Adelete(m_parentID, m_name.c_str());
     }
 
-    hid_t dataspace  = H5Screate(H5S_SCALAR);
-    hid_t datatype = H5Tcopy(H5T_C_S1);
+    Dataspace dataspace(H5Screate(H5S_SCALAR));
+    Datatype datatype(H5Tcopy(H5T_C_S1));
     H5Tset_size(datatype, value.size());
     H5Tset_strpad(datatype, H5T_STR_NULLTERM);
 
     m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Awrite(m_id, datatype, value.c_str());
-    H5Sclose(dataspace);
     return *this;
 }
 

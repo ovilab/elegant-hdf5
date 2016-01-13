@@ -3,6 +3,8 @@
 
 #include <hdf5.h>
 
+namespace h5cpp {
+
 class Datatype
 {
 public:
@@ -14,19 +16,32 @@ public:
 
     ~Datatype();
 
+    enum class Type {
+        Unknown = -1,
+        Int,
+        Float,
+        Double
+    };
+
     bool isValid() const;
     bool isInt() const;
     bool isFloat() const;
     bool isDouble() const;
 
+    Type type() const;
+
     void close();
-
-    hid_t id() const;
-
-    operator hid_t() const;
 private:
-    hid_t m_id;
+    hid_t id() const;
     void constructFromOther(const Datatype &other);
+    hid_t m_id;
+    operator hid_t() const;
+
+    friend class Attribute;
+    friend class Dataset;
+    friend class Object;
 };
+
+} // namespace
 
 #endif // DATATYPE_H

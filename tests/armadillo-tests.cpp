@@ -91,5 +91,14 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 REQUIRE(0 == Approx(max(max(abs(C - D)))));
             }
         }
+        WHEN("writing a scalar") {
+            colvec c = ones(5);
+            double scalar = 85.4;
+            file["my_scalar"] = scalar;
+            THEN("the same should be read back to a cube") {
+                cube cr = file["my_scalar"].value<cube>(Object::Requirement::GreaterThanOrEqualDimensionCount);
+                REQUIRE(cr(0, 0, 0) == scalar);
+            }
+        }
     }
 }

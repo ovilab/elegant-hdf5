@@ -58,6 +58,11 @@ public:
         Attribute
     };
 
+    enum class Requirement {
+        MatchingDimensionCount,
+        GreaterThanOrEqualDimensionCount
+    };
+
     const std::string &name() const;
     Type type() const;
     hid_t id() const;
@@ -68,7 +73,7 @@ public:
 #endif
 
     template<typename T>
-    T value() const;
+    T value(Requirement mode = Requirement::MatchingDimensionCount) const;
 
     bool isValid() const;
     bool isDataset() const;

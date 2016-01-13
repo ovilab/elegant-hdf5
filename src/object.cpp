@@ -267,6 +267,9 @@ Attribute Object::operator()(string key) const
 
 Attribute Object::attribute(string key) const
 {
+    if(!isValid()) {
+        throw std::runtime_error("Trying to access attribute of invalid object");
+    }
     if(!hasAttribute(key)) {
         return Attribute(0, m_id, key);
     }
@@ -275,6 +278,9 @@ Attribute Object::attribute(string key) const
 
 vector<Attribute> Object::attributes() const
 {
+    if(!isValid()) {
+        throw std::runtime_error("Trying to access attributes of invalid object");
+    }
     vector<Attribute> returnedAttributes;
     for(string key : attributeKeys()) {
         returnedAttributes.emplace_back(attribute(key));
@@ -284,6 +290,9 @@ vector<Attribute> Object::attributes() const
 
 bool Object::hasAttribute(string name) const
 {
+    if(!isValid()) {
+        throw std::runtime_error("Trying to probe attribute of invalid object");
+    }
     if(H5Aexists(m_id, name.c_str()) != true) {
         return false;
     }

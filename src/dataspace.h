@@ -23,11 +23,18 @@ public:
     std::vector<hsize_t> extents() const;
     int dimensionCount() const;
 
-    hid_t id() const;
+    bool isScalar() const;
+    bool isSimple() const;
+
     void close();
 
-    operator hid_t() const;
+    friend class Attribute;
+    friend class Dataset;
+    friend class Object;
 private:
+    hid_t id() const;
+    operator hid_t() const;
+    H5S_class_t extentType() const;
     hid_t m_id;
 };
 
