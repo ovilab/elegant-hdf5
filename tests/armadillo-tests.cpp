@@ -53,6 +53,16 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
             }
         }
+        WHEN("writing matrix to test order") {
+            File file2("arma2.h5", File::OpenMode::Truncate);
+            mat ma(6, 8);
+            for(unsigned int i = 0; i < ma.n_rows; i++) {
+                for(unsigned int j = 0; j < ma.n_cols; j++) {
+                    ma(i, j) = j + i * ma.n_cols;
+                }
+            }
+            file2["my_ordered_mat"] = ma;
+        }
         WHEN("writing a couple of objects") {
             mat ma = ones(2, 4);
             file["my_mat"] = ma;

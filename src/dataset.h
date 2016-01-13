@@ -143,6 +143,7 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
     hid_t datatype = TypeHelper<T>::hdfType();
     hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
                               H5P_DEFAULT, creationParameters, H5P_DEFAULT);
+
     if(dataset < 1) {
         throw std::runtime_error("Could not create dataset");
     }
@@ -186,17 +187,20 @@ inline T Dataset::valueImpl(Requirement mode) const
     }
     if(mode == Object::Requirement::GreaterThanOrEqualDimensionCount && datasetDimensionCount < targetDimensionCount) {
         std::vector<hsize_t> targetExtents(targetDimensionCount);
-        for(int i = 0; i < datasetDimensionCount; i++) {
-            targetExtents[i] = extent[i];
-        }
-        for(int i = datasetDimensionCount; i < targetDimensionCount; i++) {
+        int diff = targetDimensionCount - datasetDimensionCount;
+        for(int i = 0; i < diff; i++) {
             targetExtents[i] = 1;
+        }
+        for(int i = diff; i < targetDimensionCount; i++) {
+            targetExtents[i] = extent[i - diff];
         }
         extent = targetExtents;
     }
     T object = TypeHelper<T>::objectFromExtents(extent);
     hid_t datatype = TypeHelper<T>::hdfType();
-    herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, TypeHelper<T>::writableBuffer(object));
+    TypeHelper<T> temporary;
+    herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.writableBuffer(object));
+    temporary.afterWrite(object);
     if(readError < 0) {
         throw std::runtime_error("Could not read dataset");
     }

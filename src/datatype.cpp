@@ -52,37 +52,12 @@ bool Datatype::isValid() const
     }
 }
 
-bool Datatype::isInt() const
-{
-    if(H5Tequal(m_id, H5T_NATIVE_INT)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool Datatype::isFloat() const
-{
-    if(H5Tequal(m_id, H5T_NATIVE_FLOAT)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool Datatype::isDouble() const
-{
-    if(H5Tequal(m_id, H5T_NATIVE_DOUBLE)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 Datatype::Type Datatype::type() const
 {
     if(H5Tequal(m_id, H5T_NATIVE_INT)) {
         return Type::Int;
+    } else if(H5Tequal(m_id, H5T_NATIVE_LONG)) {
+        return Type::Long;
     } else if(H5Tequal(m_id, H5T_NATIVE_FLOAT)) {
         return Type::Float;
     } else if(H5Tequal(m_id, H5T_NATIVE_DOUBLE)) {

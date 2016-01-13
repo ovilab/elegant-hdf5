@@ -34,7 +34,7 @@ struct SimpleTypeHelper
         (void)extents;
         return T();
     }
-    static void* writableBuffer(T& object) {
+    void* writableBuffer(T& object) {
         return &object;
     }
     const void* readableBuffer(const T& object) {
@@ -53,6 +53,9 @@ struct SimpleTypeHelper
     static std::vector<hsize_t> extentsFromType(const T &object) {
         (void)object;
         return std::vector<hsize_t>();
+    }
+    void afterWrite(T& object) {
+        (void)object;
     }
 };
 

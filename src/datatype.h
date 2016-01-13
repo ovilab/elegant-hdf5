@@ -19,14 +19,12 @@ public:
     enum class Type {
         Unknown = -1,
         Int,
+        Long,
         Float,
         Double
     };
 
     bool isValid() const;
-    bool isInt() const;
-    bool isFloat() const;
-    bool isDouble() const;
 
     Type type() const;
 

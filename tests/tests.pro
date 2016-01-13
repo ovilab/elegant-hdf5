@@ -14,16 +14,16 @@ LIBS += -lh5cpp -L../src
 
 SOURCES += \
     tests.cpp \
-    attribute-tests.cpp \
-    armadillo-tests.cpp \
-    file-tests.cpp \
-    datatype-tests.cpp \
-    group-tests.cpp \
-    std-tests.cpp \
-    dataset-tests.cpp \
-    armadillo-attribute-tests.cpp \
-    sandbox-tests.cpp \
-    noconversion-tests.cpp
+#    attribute-tests.cpp \
+#    armadillo-tests.cpp \
+#    file-tests.cpp \
+#    datatype-tests.cpp \
+#    group-tests.cpp \
+#    std-tests.cpp \
+#    dataset-tests.cpp \
+#    armadillo-attribute-tests.cpp \
+#    noconversion-tests.cpp \
+    sandbox-tests.cpp
 
 CONFIG(debug, debug|release) {
     DEFINES += H5CPP_USE_GLOG

@@ -33,7 +33,7 @@ struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
         }
         return false;
     }
-    static void* writableBuffer(std::vector<eT>& object) {
+    void* writableBuffer(std::vector<eT>& object) {
         return &object[0];
     }
     const void* readableBuffer(const std::vector<eT>& object) {

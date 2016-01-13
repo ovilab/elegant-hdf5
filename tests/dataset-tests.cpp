@@ -9,7 +9,7 @@ using namespace arma;
 
 SCENARIO("Writing different datasets", "[datasets]") {
     GIVEN("a truncated file") {
-        File file("armadillo.h5", File::OpenMode::Truncate);
+        File file("dataset.h5", File::OpenMode::Truncate);
 
         int scalar_int = 82;
         float scalar_float = 83.4f;

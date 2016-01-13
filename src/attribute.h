@@ -109,7 +109,9 @@ T Attribute::value() const
     }
     T value = TypeHelper<T>::objectFromExtents(extent);
     hid_t datatype = TypeHelper<T>::hdfType();
-    herr_t readError = H5Aread(m_id, datatype, TypeHelper<T>::writableBuffer(value));
+    TypeHelper<T> temporary;
+    herr_t readError = H5Aread(m_id, datatype, temporary.writableBuffer(value));
+    temporary.afterWrite(value);
     if(readError < 0) {
         throw std::runtime_error("Could not read attribute");
     }
