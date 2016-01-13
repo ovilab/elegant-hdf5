@@ -1,5 +1,4 @@
 #include "attribute.h"
-#include "datatype.h"
 
 using namespace std;
 
@@ -55,9 +54,9 @@ Attribute &Attribute::operator=(const Attribute &other)
         if(copyFromExistingToExisting) {
             H5Adelete(m_parentID, m_name.c_str());
         }
-        hid_t otherDataspace = H5Aget_space(other.id());
-        hid_t datatype = other.hdfType();
-        hid_t ourDataspace = H5Scopy(otherDataspace);
+        Dataspace otherDataspace = other.dataspace();
+        Datatype datatype = other.datatype();
+        Dataspace ourDataspace(H5Scopy(otherDataspace));
 
         m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, ourDataspace, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -77,9 +76,6 @@ Attribute &Attribute::operator=(const Attribute &other)
             H5Aread(other.id(), datatype, &data[0]);
             H5Awrite(m_id, datatype, &data[0]);
         }
-
-        H5Sclose(ourDataspace);
-        H5Sclose(otherDataspace);
         return *this;
     }
     DVLOG(1) << "Constructing from other";
@@ -97,6 +93,11 @@ void Attribute::constructFromOther(const Attribute &other) {
         DVLOG(1) << "Copying other attribute " << other;
         m_id = other.id();
     }
+}
+
+Dataspace Attribute::dataspace() const
+{
+    return Dataspace(H5Aget_space(m_id));
 }
 
 Attribute::~Attribute()
@@ -134,23 +135,9 @@ hid_t Attribute::parentID() const
     return m_parentID;
 }
 
-hid_t Attribute::hdfType() const
+Datatype Attribute::datatype() const
 {
-    hid_t attributeType = H5Aget_type(m_id);
-    if(attributeType < 1) {
-        throw std::runtime_error("Invalid attribute type");
-    }
-    return attributeType;
-}
-
-bool Attribute::isInt() const
-{
-    hid_t attributeType = H5Aget_type(m_id);
-    if(H5Tequal(attributeType, H5T_NATIVE_INT)) {
-        return true;
-    }
-    H5Tclose(attributeType);
-    return false;
+    return Datatype(H5Aget_type(m_id));
 }
 
 std::string Attribute::name() const
@@ -160,38 +147,7 @@ std::string Attribute::name() const
 
 vector<hsize_t> Attribute::extents() const
 {
-    if(!isValid()) {
-        return vector<hsize_t>();
-    }
-    hid_t dataspace = H5Aget_space(m_id);
-    if(dataspace < 1) {
-        throw std::runtime_error("Could not get dataspace for dataset object");
-    }
-    vector<hsize_t> result = extents(dataspace);
-    herr_t closeError = H5Sclose(dataspace);
-    if(closeError < 0) {
-        throw std::runtime_error("Could not close dataspace");
-    }
-    return result;
-}
-
-vector<hsize_t> Attribute::extents(hid_t dataspace) const
-{
-    if(!isValid()) {
-        return vector<hsize_t>();
-    }
-    int dimensionCount = H5Sget_simple_extent_ndims(dataspace);
-    if(dimensionCount < 0) {
-        throw std::runtime_error("Could not get the number of dimensions for dataspace");
-    }
-    DVLOG(1) << "Dimensions are " << dimensionCount;
-
-    std::vector<hsize_t> extents(dimensionCount);
-    int error = H5Sget_simple_extent_dims(dataspace, &extents[0], NULL);
-    if(error < 0) {
-        throw std::runtime_error("Could not get the extents for dataspace");
-    }
-    return extents;
+    return dataspace().extents();
 }
 
 std::string Attribute::toString() const
@@ -199,7 +155,7 @@ std::string Attribute::toString() const
     if(m_id == 0) {
         return std::string();
     }
-    hid_t attributeType = hdfType();
+    Datatype attributeType = datatype();
     hid_t typeClass = H5Tget_class(attributeType);
     if (typeClass != H5T_STRING) {
         DVLOG(1) << "ERROR: Trying to output non-string type to string. This is not yet supported.";

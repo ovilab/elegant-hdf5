@@ -87,6 +87,8 @@ public:
 
     void close();
 
+    friend std::ostream& operator<<(std::ostream&, const Object&);
+
 protected:
     void constructFromOther(const Object &other);
 
@@ -104,8 +106,6 @@ Object::operator T() const
     return value<T>();
 }
 #endif
-
-}
 
 template<typename T>
 inline T& operator<<(T &other, const h5cpp::Object &object)
@@ -150,5 +150,7 @@ inline std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object)
     out << "Object(type=" << typeName << ", id=" << object.id() << ", name=\"" << object.name() << "\")";
     return out;
 }
+
+} // namespace h5cpp
 
 #endif // TEMP_H

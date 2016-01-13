@@ -16,7 +16,10 @@ SOURCES += \
     object.cpp \
     attribute.cpp \
     errorhelper.cpp \
-    datatype.cpp
+    datatype.cpp \
+    dataobject.cpp \
+    dataspacehelper.cpp \
+    dataspace.cpp
 
 HEADERS += \
     dataset.h \
@@ -38,7 +41,10 @@ HEADERS += \
     h5cpp/Attribute \
     converters/std-converters.h \
     errorhelper.h \
-    datatype.h
+    datatype.h \
+    dataobject.h \
+    dataspacehelper.h \
+    dataspace.h
 
 release {
     !debug {

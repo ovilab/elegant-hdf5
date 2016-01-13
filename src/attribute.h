@@ -4,6 +4,8 @@
 #include "typehelper.h"
 #include "logging.h"
 #include "demangle.h"
+#include "datatype.h"
+#include "dataspace.h"
 
 #include <hdf5.h>
 #include <ostream>
@@ -34,13 +36,10 @@ public:
     bool isValid() const;
     bool isNonExistingNamed() const;
 
-    bool isInt() const;
-
     std::string name() const;
     void close();
 
-    std::vector<hsize_t> extents() const;
-    std::vector<hsize_t> extents(hid_t dataspace) const;
+    Datatype datatype() const;
 
     template<typename T>
     T value() const;
@@ -54,16 +53,18 @@ public:
     operator std::string() const;
 #endif
 
-//    friend std::ostream& operator<< (std::ostream &, const Attribute &);
+    friend std::ostream& operator<<(std::ostream&, const Attribute&);
+
+    std::vector<hsize_t> extents() const;
+private:
     hid_t id() const;
     hid_t parentID() const;
+    void constructFromOther(const Attribute &other);
+    Dataspace dataspace() const;
 
-private:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
-    void constructFromOther(const Attribute &other);
-    hid_t hdfType() const;
 };
 
 #ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
@@ -92,7 +93,7 @@ T Attribute::value() const
     if(m_id == 0) {
         throw std::runtime_error("Attribute does not exist");
     }
-    std::vector<hsize_t> extent = extents();
+    std::vector<hsize_t> extent = dataspace().extents();
     int dimensionCount = extent.size();
     if(dimensionCount != TypeHelper<T>::dimensionCount()) {
         std::stringstream errorStream;
@@ -136,40 +137,18 @@ void Attribute::operator=(const T &other)
     DVLOG(1) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 
-}
-
 inline std::ostream& operator<< (std::ostream &out, const h5cpp::Attribute &attribute)
 {
     std::string typeName = "Unknown";
-//    h5cpp::Object::Type type = object.type();
-//    switch(type) {
-//    case h5cpp::Object::Type::File:
-//        typeName = "File";
-//        break;
-//    case h5cpp::Object::Type::Group:
-//        typeName = "Group";
-//        break;
-//    case h5cpp::Object::Type::Datatype:
-//        typeName = "Datatype";
-//        break;
-//    case h5cpp::Object::Type::Dataspace:
-//        typeName = "Dataspace";
-//        break;
-//    case h5cpp::Object::Type::Dataset:
-//        typeName = "Dataset";
-//        break;
-//    case h5cpp::Object::Type::Attribute:
-//        typeName = "Attribute";
-//        break;
-//    default:
-//        break;
-//    }
     out << "Attribute(type=" << typeName
         << ", id=" << attribute.id()
         << ", name=\"" << attribute.name()
         << "\", parent=\"" << attribute.parentID() << "\")";
     return out;
 }
+
+} // namespace h5cpp
+
 
 
 #endif // H5CPP_ATTRIBUTE_H
