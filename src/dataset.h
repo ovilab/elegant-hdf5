@@ -40,15 +40,13 @@ public:
     template<typename T>
     static Dataset create(hid_t parentID, const std::string &name, const T &data);
 
-    template<typename T>
-    T value() const;
-
-#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
-    template<typename T>
-    operator T() const;
-#endif
 private:
     std::vector<hsize_t> extents(hid_t dataspace) const;
+
+    template<typename T>
+    T valueImpl() const;
+
+    friend class Object;
 };
 
 #ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
@@ -152,14 +150,6 @@ Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
     return Dataset(dataset, parentID, name);
 }
 
-#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
-template<typename T>
-inline Dataset::operator T() const
-{
-    return value<T>();
-}
-#endif
-
 template<typename T>
 T Object::value() const
 {
@@ -169,11 +159,11 @@ T Object::value() const
         throw std::runtime_error(errorStream.str());
     }
     Dataset dataset = *this;
-    return dataset.value<T>();
+    return dataset.valueImpl<T>();
 }
 
 template<typename T>
-inline T Dataset::value() const
+inline T Dataset::valueImpl() const
 {
     DVLOG(1) << "Reading dataset " << m_id << " " << m_name << " " << m_parentID << " to type " << demangle(typeid(T).name());
     if(!isValid()) {

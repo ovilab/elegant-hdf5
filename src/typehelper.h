@@ -12,6 +12,12 @@ namespace h5cpp {
 
 class Dataset;
 
+//enum class DataspaceType {
+//    Scalar,
+//    Simple,
+//    Null
+//};
+
 template<typename T>
 struct SimpleTypeHelper
 {

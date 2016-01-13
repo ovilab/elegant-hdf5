@@ -33,8 +33,9 @@ public:
 
     bool isValid() const;
     bool isNonExistingNamed() const;
-    hid_t id() const;
-    hid_t parentID() const;
+
+    bool isInt() const;
+
     std::string name() const;
     void close();
 
@@ -53,11 +54,16 @@ public:
     operator std::string() const;
 #endif
 
+//    friend std::ostream& operator<< (std::ostream &, const Attribute &);
+    hid_t id() const;
+    hid_t parentID() const;
+
 private:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
     void constructFromOther(const Attribute &other);
+    hid_t hdfType() const;
 };
 
 #ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
@@ -164,5 +170,6 @@ inline std::ostream& operator<< (std::ostream &out, const h5cpp::Attribute &attr
         << "\", parent=\"" << attribute.parentID() << "\")";
     return out;
 }
+
 
 #endif // H5CPP_ATTRIBUTE_H

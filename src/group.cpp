@@ -111,42 +111,9 @@ Object Group::item(string key) const
     return Object(id, m_id, key);
 }
 
-vector<string> Group::attributeKeys() const
-{
-    vector<string> returnedAttributes;
-    hsize_t idx = 0;
-    H5_index_t l = H5_INDEX_NAME; // TODO: Move to function param?
-    H5Aiterate(m_id, l, H5_ITER_INC, &idx,
-               [&](hid_t g_id, const char *name, const H5A_info_t *info, void *namesVoid) -> herr_t {
-        (void)g_id;
-        (void)info;
-        vector<string> &names = *(vector<string>*)(namesVoid);
-
-        string nameString(name);
-        names.push_back(nameString);
-
-        return 0;
-    }, &returnedAttributes);
-
-    return returnedAttributes;
-}
-
 Object Group::operator[](string key) const
 {
     return item(key);
-}
-
-Attribute Group::operator()(string key) const
-{
-    return attribute(key);
-}
-
-Attribute Group::attribute(string key) const
-{
-    if(!hasAttribute(key)) {
-        return Attribute(0, m_id, key);
-    }
-    return Attribute(m_id, key);
 }
 
 vector<string> split(const string &s, char delim)
@@ -222,23 +189,6 @@ bool Group::hasKey(string name) const
             return false;
         }
         fullPath << "/";
-    }
-    return true;
-}
-
-vector<Attribute> Group::attributes() const
-{
-    vector<Attribute> returnedAttributes;
-    for(string key : attributeKeys()) {
-        returnedAttributes.emplace_back(attribute(key));
-    }
-    return returnedAttributes;
-}
-
-bool Group::hasAttribute(string name) const
-{
-    if(H5Aexists(m_id, name.c_str()) != true) {
-        return false;
     }
     return true;
 }

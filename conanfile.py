@@ -5,14 +5,14 @@ class H5CppConan(ConanFile):
     name = "h5cpp"
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
-    exports = "h5cpp.pro", "src/*", "tests/*", ".qmake.conf", "library_deployment.pri"
+    exports = "h5cpp.pro", "src/*", "tests/*", "libs/*", ".qmake.conf", "library_deployment.pri"
 
     def build(self):
         cmake = CMake(self.settings)
         print cmake.command_line
         print cmake.build_config
         self.run('mkdir build')
-        self.run('cd build && qmake ../h5cpp.pro')
+        self.run('cd build && qmake ../h5cpp.pro CONFIG+=notests')
         self.run("cd build && make -j4")
 
     def package(self):

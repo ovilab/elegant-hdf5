@@ -36,11 +36,6 @@ public:
     Group createGroup(std::string name);
 
     bool hasKey(std::string name) const;
-    std::vector<Attribute> attributes() const;
-    std::vector<std::string> attributeKeys() const;
-    Attribute operator ()(std::string key) const;
-    h5cpp::Attribute attribute(std::string key) const;
-    bool hasAttribute(std::string name) const;
 
 private:
     Group(hid_t id, hid_t parentID, std::string name);

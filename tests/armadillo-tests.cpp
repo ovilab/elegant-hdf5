@@ -40,6 +40,17 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 mat mar;
                 mar = file["my_mat"].value<mat>();
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+                mar << file["my_mat"];
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+                file["my_mat"] >> mar;
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+                Dataset ds = file["my_mat"];
+                mar = ds.value<mat>();
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+                mar << ds;
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
+                ds >> mar;
+                REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
             }
         }
         WHEN("writing a couple of objects") {

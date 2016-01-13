@@ -1,6 +1,5 @@
 #include <catch.hpp>
 
-#define H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
 #include <h5cpp/h5cpp>
 #include <armadillo>
 

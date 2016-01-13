@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <typeinfo>
+#include <vector>
 
 namespace h5cpp {
 //class Object;
@@ -78,6 +79,12 @@ public:
     static H5I_type_t toHdf5Type(Object::Type hType);
     hid_t parentID() const;
 
+    std::vector<Attribute> attributes() const;
+    std::vector<std::string> attributeKeys() const;
+    Attribute operator ()(std::string key) const;
+    h5cpp::Attribute attribute(std::string key) const;
+    bool hasAttribute(std::string name) const;
+
     void close();
 
 protected:
@@ -98,6 +105,20 @@ Object::operator T() const
 }
 #endif
 
+}
+
+template<typename T>
+inline T& operator<<(T &other, const h5cpp::Object &object)
+{
+    other = object.value<T>();
+    return other;
+}
+
+template<typename T>
+inline T& operator>>(const h5cpp::Object &object, T &other)
+{
+    other = object.value<T>();
+    return other;
 }
 
 inline std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object)

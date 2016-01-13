@@ -15,4 +15,5 @@ int main(int argc, char* const argv[])
 #endif
     int result = Catch::Session().run(argc, argv);
     return result;
+
 }

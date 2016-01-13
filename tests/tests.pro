@@ -16,13 +16,13 @@ SOURCES += \
     tests.cpp \
     attribute-tests.cpp \
     armadillo-tests.cpp \
-    file-tests.cpp \
-    group-tests.cpp \
-    std-tests.cpp \
-    dataset-tests.cpp \
-    armadillo-attribute-tests.cpp \
-    sandbox-tests.cpp \
-    noconversion-tests.cpp
+    file-tests.cpp
+#    group-tests.cpp \
+#    std-tests.cpp \
+#    dataset-tests.cpp \
+#    armadillo-attribute-tests.cpp \
+#    sandbox-tests.cpp \
+#    noconversion-tests.cpp
 
 CONFIG(debug, debug|release) {
     DEFINES += H5CPP_USE_GLOG

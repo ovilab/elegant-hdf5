@@ -1,4 +1,5 @@
 #include "attribute.h"
+#include "datatype.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ Attribute &Attribute::operator=(const Attribute &other)
             H5Adelete(m_parentID, m_name.c_str());
         }
         hid_t otherDataspace = H5Aget_space(other.id());
-        hid_t datatype = H5Aget_type(other.id());
+        hid_t datatype = other.hdfType();
         hid_t ourDataspace = H5Scopy(otherDataspace);
 
         m_id = H5Acreate(m_parentID, m_name.c_str(), datatype, ourDataspace, H5P_DEFAULT, H5P_DEFAULT);
@@ -133,6 +134,25 @@ hid_t Attribute::parentID() const
     return m_parentID;
 }
 
+hid_t Attribute::hdfType() const
+{
+    hid_t attributeType = H5Aget_type(m_id);
+    if(attributeType < 1) {
+        throw std::runtime_error("Invalid attribute type");
+    }
+    return attributeType;
+}
+
+bool Attribute::isInt() const
+{
+    hid_t attributeType = H5Aget_type(m_id);
+    if(H5Tequal(attributeType, H5T_NATIVE_INT)) {
+        return true;
+    }
+    H5Tclose(attributeType);
+    return false;
+}
+
 std::string Attribute::name() const
 {
     return m_name;
@@ -179,7 +199,7 @@ std::string Attribute::toString() const
     if(m_id == 0) {
         return std::string();
     }
-    hid_t attributeType = H5Aget_type(m_id);
+    hid_t attributeType = hdfType();
     hid_t typeClass = H5Tget_class(attributeType);
     if (typeClass != H5T_STRING) {
         DVLOG(1) << "ERROR: Trying to output non-string type to string. This is not yet supported.";

@@ -31,6 +31,10 @@ SCENARIO("Opening files in different modes", "[openfiles]") {
         THEN("we should be able to read") {
             vec test = file["test"];
         }
+        THEN("we should get an exception on writing") {
+            // TODO throw if file is not writable
+//            REQUIRE_THROWS_AS(file["test2"] = 24, std::runtime_error);
+        }
     }
 }
 

@@ -240,4 +240,55 @@ hid_t Object::parentID() const
     return m_parentID;
 }
 
+vector<string> Object::attributeKeys() const
+{
+    vector<string> returnedAttributes;
+    hsize_t idx = 0;
+    H5_index_t l = H5_INDEX_NAME; // TODO: Move to function param?
+    H5Aiterate(m_id, l, H5_ITER_INC, &idx,
+               [&](hid_t g_id, const char *name, const H5A_info_t *info, void *namesVoid) -> herr_t {
+        (void)g_id;
+        (void)info;
+        vector<string> &names = *(vector<string>*)(namesVoid);
+
+        string nameString(name);
+        names.push_back(nameString);
+
+        return 0;
+    }, &returnedAttributes);
+
+    return returnedAttributes;
+}
+
+Attribute Object::operator()(string key) const
+{
+    return attribute(key);
+}
+
+Attribute Object::attribute(string key) const
+{
+    if(!hasAttribute(key)) {
+        return Attribute(0, m_id, key);
+    }
+    return Attribute(m_id, key);
+}
+
+vector<Attribute> Object::attributes() const
+{
+    vector<Attribute> returnedAttributes;
+    for(string key : attributeKeys()) {
+        returnedAttributes.emplace_back(attribute(key));
+    }
+    return returnedAttributes;
+}
+
+bool Object::hasAttribute(string name) const
+{
+    if(H5Aexists(m_id, name.c_str()) != true) {
+        return false;
+    }
+    return true;
+}
+
+
 }
