@@ -6,6 +6,8 @@ class H5CppConan(ConanFile):
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     exports = "h5cpp.pro", "src/*", "tests/*", "libs/*", ".qmake.conf", "library_deployment.pri"
+    url = "http://github.com/dragly/h5cpp"
+    license = "gplv3"
 
     def build(self):
         cmake = CMake(self.settings)
