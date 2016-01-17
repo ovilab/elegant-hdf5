@@ -21,7 +21,8 @@ public:
         Int,
         Long,
         Float,
-        Double
+        Double,
+        String
     };
 
     bool isValid() const;

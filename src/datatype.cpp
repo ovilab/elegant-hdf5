@@ -62,6 +62,8 @@ Datatype::Type Datatype::type() const
         return Type::Float;
     } else if(H5Tequal(m_id, H5T_NATIVE_DOUBLE)) {
         return Type::Double;
+    } else if(H5Tget_class(m_id) == H5T_STRING) {
+        return Type::String;
     } else {
         return Type::Unknown;
     }

@@ -48,6 +48,9 @@ Datatype Dataset::datatype_impl() const
 
 Dataspace Dataset::dataspace() const
 {
+    if(!isValid()) {
+        return Dataspace(0);
+    }
     return Dataspace(H5Dget_space(m_id));
 }
 

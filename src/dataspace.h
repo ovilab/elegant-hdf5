@@ -2,7 +2,7 @@
 #define DATASPACE_H
 
 #include <vector>
-
+#include <stdexcept>
 #include <hdf5.h>
 
 namespace h5cpp {
