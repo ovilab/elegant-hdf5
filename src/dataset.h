@@ -84,7 +84,7 @@ Dataset& Dataset::operator=(const T &data)
 {
     DVLOG(1) << "Dataset assignment operator of T type: " << typeid(T).name();
     DVLOG(1) << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id;
-    bool doesNotExistYet = m_id == 0 && m_parentID > 0;
+    bool doesNotExistYet = (m_id == 0 && m_parentID > 0);
     if(doesNotExistYet) {
         *this = Dataset::create(m_parentID, m_name, data);
     } else {
@@ -93,11 +93,6 @@ Dataset& Dataset::operator=(const T &data)
             return *this;
         }
         int targetDimensions = TypeHelper<T>::dimensionCount();
-        Dataspace dataspace(H5Dget_space(m_id));
-        if(dataspace < 1) {
-            throw std::runtime_error("Could not get dataspace");
-            return *this;
-        }
         std::vector<hsize_t> extent = extents();
         int currentDimensions = extent.size();
         bool shouldOverwrite = false;
@@ -108,7 +103,6 @@ Dataset& Dataset::operator=(const T &data)
             DVLOG(1) << "WARNING: Writing over dataset of different shape. "
                      << "Limitations in HDF5 standard makes it impossible to free space taken "
                      << "up by the old dataset.";
-            dataspace.close();
             close();
             herr_t deleteError = H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
             if(deleteError < 0) {
