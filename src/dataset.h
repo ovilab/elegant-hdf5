@@ -162,6 +162,7 @@ T Object::value(Requirement mode) const
     return dataset.valueImpl<T>(mode);
 }
 
+// TODO Does this lead to a costly copy? If so, the implementation needs to be changed.
 template<typename T>
 inline T Dataset::valueImpl(Requirement mode) const
 {
