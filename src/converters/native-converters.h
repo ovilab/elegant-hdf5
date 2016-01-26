@@ -3,7 +3,9 @@
 
 #include "../typehelper.h"
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 template<>
 struct TypeHelper<char> : public SimpleTypeHelper<char> {
@@ -82,6 +84,7 @@ struct TypeHelper<bool> : public SimpleTypeHelper<bool> {
     int value;
 };
 
+}
 }
 
 #endif // NATIVECONVERTERS

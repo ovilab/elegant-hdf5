@@ -2,7 +2,9 @@
 
 #include <stdexcept>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 Datatype::Datatype()
 {
@@ -85,3 +87,4 @@ void Datatype::constructFromOther(const Datatype &other) {
 }
 
 } // namespace
+}

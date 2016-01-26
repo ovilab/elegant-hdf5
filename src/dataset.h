@@ -17,7 +17,9 @@
 #include <iostream>
 #include <typeinfo>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class DatasetWriter : public Writer
 {
@@ -200,6 +202,7 @@ inline T Dataset::valueImpl(Requirement mode) const
     return typeHelper.readFromFile(extent, reader);
 }
 
+}
 }
 
 #endif // DATASET_H

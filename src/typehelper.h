@@ -8,7 +8,9 @@
 #include <type_traits>
 #include <vector>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class Dataset;
 
@@ -69,6 +71,7 @@ struct TypeHelper : public SimpleTypeHelper<T>
     static hid_t hdfType() = delete;
 };
 
+}
 }
 
 #endif // UTILS_H

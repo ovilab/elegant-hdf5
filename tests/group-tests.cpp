@@ -1,10 +1,10 @@
-#include "../src/h5cpp/h5cpp"
+#include "../src/elegant/hdf5/hdf5"
 
 #include <catch.hpp>
 #include <iostream>
 
 using namespace std;
-using namespace h5cpp;
+using namespace elegant::hdf5;
 using namespace arma;
 
 SCENARIO("Reading and writing groups", "[groups]") {

@@ -5,7 +5,9 @@
 
 #include <vector>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 template<typename eT>
 struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
@@ -34,6 +36,7 @@ struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
     }
 };
 
+}
 }
 
 #endif // STDCONVERTERS

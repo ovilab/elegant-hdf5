@@ -1,11 +1,11 @@
 #include <catch.hpp>
 
 #define H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
-#include <h5cpp/h5cpp>
+#include <elegant/hdf5/hdf5>
 #include <armadillo>
 
 using namespace std;
-using namespace h5cpp;
+using namespace elegant::hdf5;
 using namespace arma;
 
 SCENARIO("Tests with no user-defined conversion operators", "[noconversion]") {

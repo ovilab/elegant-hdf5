@@ -18,16 +18,19 @@
 # endif
 #endif
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 class H5CPP_DLL_EXPORT_FOR_WINDOWS DummyLog {
  public:
   DummyLog() { }
   void operator&(std::ostream&) { }
 };
 }
+}
 
-#define DLOG(severity) true ? (void)0 : h5cpp::DummyLog() & std::cout
-#define DVLOG(verboselevel) true ? (void)0 : h5cpp::DummyLog() & std::cout
+#define DLOG(severity) true ? (void)0 : elegant::hdf5::DummyLog() & std::cout
+#define DVLOG(verboselevel) true ? (void)0 : elegant::hdf5::DummyLog() & std::cout
 
 #endif
 

@@ -6,7 +6,9 @@
 
 using namespace std;
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 Object::Object()
 {
 }
@@ -300,4 +302,5 @@ bool Object::hasAttribute(string name) const
 }
 
 
+}
 }

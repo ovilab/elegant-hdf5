@@ -12,17 +12,22 @@
 #include <typeinfo>
 #include <vector>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 //class Object;
 class Dataset;
 class Group;
 class File;
 class Attribute;
 }
+}
 
-//std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object);
+//std::ostream& operator<< (std::ostream &out, const elegant::hdf5::Object &object);
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 class Object
 {
 public:
@@ -87,7 +92,7 @@ public:
     std::vector<Attribute> attributes() const;
     std::vector<std::string> attributeKeys() const;
     Attribute operator ()(std::string key) const;
-    h5cpp::Attribute attribute(std::string key) const;
+    Attribute attribute(std::string key) const;
     bool hasAttribute(std::string name) const;
 
     void close();
@@ -113,40 +118,40 @@ Object::operator T() const
 #endif
 
 template<typename T>
-inline T& operator<<(T &other, const h5cpp::Object &object)
+inline T& operator<<(T &other, const elegant::hdf5::Object &object)
 {
     other = object.value<T>();
     return other;
 }
 
 template<typename T>
-inline T& operator>>(const h5cpp::Object &object, T &other)
+inline T& operator>>(const elegant::hdf5::Object &object, T &other)
 {
     other = object.value<T>();
     return other;
 }
 
-inline std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object)
+inline std::ostream& operator<< (std::ostream &out, const elegant::hdf5::Object &object)
 {
     std::string typeName = "Unknown";
-    h5cpp::Object::Type type = object.type();
+    elegant::hdf5::Object::Type type = object.type();
     switch(type) {
-    case h5cpp::Object::Type::File:
+    case elegant::hdf5::Object::Type::File:
         typeName = "File";
         break;
-    case h5cpp::Object::Type::Group:
+    case elegant::hdf5::Object::Type::Group:
         typeName = "Group";
         break;
-    case h5cpp::Object::Type::Datatype:
+    case elegant::hdf5::Object::Type::Datatype:
         typeName = "Datatype";
         break;
-    case h5cpp::Object::Type::Dataspace:
+    case elegant::hdf5::Object::Type::Dataspace:
         typeName = "Dataspace";
         break;
-    case h5cpp::Object::Type::Dataset:
+    case elegant::hdf5::Object::Type::Dataset:
         typeName = "Dataset";
         break;
-    case h5cpp::Object::Type::Attribute:
+    case elegant::hdf5::Object::Type::Attribute:
         typeName = "Attribute";
         break;
     default:
@@ -157,5 +162,6 @@ inline std::ostream& operator<< (std::ostream &out, const h5cpp::Object &object)
 }
 
 } // namespace h5cpp
+}
 
 #endif // TEMP_H

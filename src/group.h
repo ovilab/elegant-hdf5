@@ -11,7 +11,9 @@
 #include <vector>
 #include <iostream>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class Group : public Object
 {
@@ -48,6 +50,7 @@ inline Object::operator Group() const {
 }
 #endif
 
+}
 }
 
 #endif // GROUP_H

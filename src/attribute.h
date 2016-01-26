@@ -14,7 +14,9 @@
 #include <sstream>
 #include <typeinfo>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class AttributeReader : public Reader
 {
@@ -47,11 +49,13 @@ public:
 //    Attribute(Attribute &&other) = default;
     Attribute& operator=(const Attribute &other);
     Attribute& operator=(const std::string &value);
+    Attribute& operator=(const char* object);
 //    Attribute& operator=(Attribute &&other) = default;
     ~Attribute();
 
     template<typename T>
     void operator=(const T &other);
+
 
     bool isValid() const;
     bool isNonExistingNamed() const;
@@ -157,7 +161,7 @@ void Attribute::operator=(const T &object)
     DVLOG(1) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 
-inline std::ostream& operator<< (std::ostream &out, const h5cpp::Attribute &attribute)
+inline std::ostream& operator<< (std::ostream &out, const elegant::hdf5::Attribute &attribute)
 {
     std::string typeName = "Unknown";
     out << "Attribute(type=" << typeName
@@ -169,6 +173,6 @@ inline std::ostream& operator<< (std::ostream &out, const h5cpp::Attribute &attr
 
 } // namespace h5cpp
 
-
+}
 
 #endif // H5CPP_ATTRIBUTE_H

@@ -10,7 +10,9 @@
 
 using namespace std;
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 Group::Group()
     : Object()
@@ -193,4 +195,5 @@ bool Group::hasKey(string name) const
     return true;
 }
 
+}
 }

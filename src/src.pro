@@ -3,7 +3,7 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-TARGET = h5cpp
+TARGET = elegant_hdf5
 
 INCLUDEPATH += /usr/include/hdf5/serial
 
@@ -15,11 +15,9 @@ SOURCES += \
     group.cpp \
     object.cpp \
     attribute.cpp \
-    errorhelper.cpp \
     datatype.cpp \
-    dataobject.cpp \
-    dataspacehelper.cpp \
-    dataspace.cpp
+    dataspace.cpp \
+    errorhelper.cpp
 
 HEADERS += \
     dataset.h \
@@ -28,23 +26,21 @@ HEADERS += \
     object.h \
     attribute.h \
     logging.h \
-    h5cpp/Dataset \
-    h5cpp/File \
-    h5cpp/Group \
-    h5cpp/Object \
-    h5cpp/h5cpp \
     typehelper.h \
     demangle.h \
     h5cpp/armadillo \
     converters/native-converters.h \
     converters/armadillo-converters.h \
-    h5cpp/Attribute \
     converters/std-converters.h \
-    errorhelper.h \
     datatype.h \
-    dataobject.h \
-    dataspacehelper.h \
-    dataspace.h
+    dataspace.h \
+    elegant/hdf5/Attribute \
+    elegant/hdf5/Dataset \
+    elegant/hdf5/File \
+    elegant/hdf5/Group \
+    elegant/hdf5/Object \
+    elegant/hdf5/hdf5 \
+    errorhelper.h
 
 release {
     !debug {

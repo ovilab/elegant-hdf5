@@ -6,7 +6,9 @@
 
 #include <armadillo>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 template<typename eT>
 struct TypeHelper<arma::Col<eT>> : public SimpleTypeHelper<arma::Col<eT>> {
@@ -172,6 +174,7 @@ struct TypeHelper<arma::eGlue<T, U, op>> : public SimpleTypeHelper<arma::eGlue<T
     }
 };
 
+}
 }
 
 #endif

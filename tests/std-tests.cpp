@@ -1,11 +1,11 @@
-#include "../src/h5cpp/h5cpp"
+#include "../src/elegant/hdf5/hdf5"
 
 #include <catch.hpp>
 #include <iostream>
 #include <vector>
 
 using namespace std;
-using namespace h5cpp;
+using namespace elegant::hdf5;
 using namespace arma;
 
 SCENARIO("Reading and writing std objects", "[std]") {

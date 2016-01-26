@@ -1,20 +1,28 @@
 #include <catch.hpp>
 
-#include <h5cpp/h5cpp>
+#include <elegant/hdf5/hdf5>
 #include <armadillo>
 
 using namespace std;
-using namespace h5cpp;
+using namespace elegant::hdf5;
 using namespace arma;
 
 SCENARIO("Sandbox tests", "[sandbox]") {
     GIVEN("a truncated file") {
-        File file("armadillo.h5", File::OpenMode::Truncate);
+        File file("armadillos.h5");
         mat A {{1,2,3},{4,5,6}};
         file["lol"] = A;
         mat B = file["lol"];
         cout << A << endl;
         cout << B << endl;
+
+        cube C = ones(3,2,4);
+        cout << C << endl;
+        file["woop"] = C;
+
+        cube D = file["woos"];
+        cout << D << endl;
+
     }
 //    GIVEN("a read-write file") {
 //        File file("/home/svenni/tmp/new.h5", File::OpenMode::ReadWrite);

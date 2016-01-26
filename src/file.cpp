@@ -8,7 +8,9 @@
 
 using namespace std;
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 File::File(string fileName, File::OpenMode mode)
     : Group()
@@ -71,4 +73,5 @@ void File::close()
     }
 }
 
+}
 }

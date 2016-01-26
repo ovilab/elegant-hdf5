@@ -9,7 +9,9 @@
 
 #include "group.h"
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class File : public Group
 {
@@ -29,6 +31,7 @@ private:
     std::string m_fileName;
 };
 
+}
 }
 
 #endif // FILE_H

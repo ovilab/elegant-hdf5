@@ -2,7 +2,9 @@
 
 using namespace std;
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 Attribute::Attribute()
 {
@@ -251,4 +253,11 @@ void AttributeWriter::write(const void *buffer) {
     }
 }
 
+Attribute& Attribute::operator=(const char *object)
+{
+    operator=(std::string(object));
+    return *this;
+}
+
+}
 }

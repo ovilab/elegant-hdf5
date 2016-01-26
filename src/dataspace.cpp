@@ -4,7 +4,9 @@
 
 using namespace std;
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 Dataspace::Dataspace(hid_t dataspaceID)
     : m_id(dataspaceID)
@@ -42,7 +44,7 @@ void Dataspace::close()
     }
 }
 
-h5cpp::Dataspace::operator hid_t() const
+elegant::hdf5::Dataspace::operator hid_t() const
 {
     return m_id;
 }
@@ -101,3 +103,4 @@ vector<hsize_t> Dataspace::extents() const
 }
 
 } // namespace
+}

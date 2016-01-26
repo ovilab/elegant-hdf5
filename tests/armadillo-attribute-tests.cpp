@@ -1,11 +1,11 @@
-#include "../src/h5cpp/Attribute"
-#include "../src/h5cpp/File"
+#include "../src/elegant/hdf5/Attribute"
+#include "../src/elegant/hdf5/File"
 
 #include <catch.hpp>
 #include <iostream>
 
 using namespace std;
-using namespace h5cpp;
+using namespace elegant::hdf5;
 using namespace arma;
 
 SCENARIO("Reading and writing Armadillo attributes", "[attributes]") {

@@ -3,7 +3,9 @@
 
 #include <hdf5.h>
 
-namespace h5cpp {
+namespace elegant {
+namespace hdf5 {
+
 
 class Datatype
 {
@@ -42,5 +44,6 @@ private:
 };
 
 } // namespace
+}
 
 #endif // DATATYPE_H
