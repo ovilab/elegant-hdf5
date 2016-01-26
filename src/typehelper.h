@@ -12,6 +12,18 @@ namespace h5cpp {
 
 class Dataset;
 
+class Writer
+{
+public:
+    virtual void write(const void *buffer) = 0;
+};
+
+class Reader
+{
+public:
+    virtual void read(void *buffer) = 0;
+};
+
 //enum class DataspaceType {
 //    Scalar,
 //    Simple,
@@ -21,6 +33,7 @@ class Dataset;
 template<typename T>
 struct SimpleTypeHelper
 {
+    using ObjectType = T;
     static hid_t hdfType() {
         return 0;
     }
@@ -30,32 +43,21 @@ struct SimpleTypeHelper
     static int dimensionCount() {
         return 0;
     }
-    static T objectFromExtents(const std::vector<hsize_t> &extents) {
-        (void)extents;
-        return T();
-    }
-    void* writableBuffer(T& object) {
-        return &object;
-    }
-    const void* readableBuffer(const T& object) {
-        return &object;
-    }
-    static bool matchingExtents(const T &object, const std::vector<hsize_t> &extents) {
-        (void)object;
-        if(extents.size() < 1) {
-            return false;
-        }
-        if(extents[0] != 1) {
-            return false;
-        }
-        return true;
-    }
-    static std::vector<hsize_t> extentsFromType(const T &object) {
+    static std::vector<hsize_t> extents(const ObjectType &object) {
         (void)object;
         return std::vector<hsize_t>();
     }
-    void afterWrite(T& object) {
+    void afterWrite(ObjectType& object) {
         (void)object;
+    }
+    ObjectType readFromFile(const std::vector<hsize_t> &extents, Reader &reader) {
+        (void)extents;
+        ObjectType object;
+        reader.read(&object);
+        return object;
+    }
+    void writeToFile(const ObjectType &object, Writer& writer) {
+        writer.write(&object);
     }
 };
 

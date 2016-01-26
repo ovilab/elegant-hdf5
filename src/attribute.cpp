@@ -227,4 +227,28 @@ Attribute &Attribute::operator=(const string &value)
     return *this;
 }
 
+AttributeReader::AttributeReader(hid_t id, hid_t datatype)
+    : Reader()
+    , m_id(id)
+    , m_datatype(datatype) {}
+
+void AttributeReader::read(void *buffer) {
+    herr_t readError = H5Aread(m_id, m_datatype, buffer);
+    if(readError < 0) {
+        throw std::runtime_error("Could not read attribute");
+    }
+}
+
+AttributeWriter::AttributeWriter(hid_t id, hid_t datatype)
+    : Writer()
+    , m_id(id)
+    , m_datatype(datatype) {}
+
+void AttributeWriter::write(const void *buffer) {
+    herr_t writeError = H5Awrite(m_id, m_datatype, buffer);
+    if(writeError < 0) {
+        throw std::runtime_error("Could not write attribute");
+    }
+}
+
 }

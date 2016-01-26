@@ -9,35 +9,28 @@ namespace h5cpp {
 
 template<typename eT>
 struct TypeHelper<std::vector<eT>> : public SimpleTypeHelper<std::vector<eT>> {
-    static hid_t hdfType() {
-        return TypeHelper<eT>::hdfType();
+    using ObjectType = std::vector<eT>;
+    hid_t hdfType() const {
+        return TypeHelper<eT>().hdfType();
     }
-    static int dimensionCount() {
+    int dimensionCount() const {
         return 1;
     }
-    static H5S_class_t dataspaceType() {
+    H5S_class_t dataspaceType() {
         return H5S_SIMPLE;
     }
-    static std::vector<eT> objectFromExtents(const std::vector<hsize_t> &extents)
-    {
-        return std::vector<eT>(extents[0]);
-    }
-    static std::vector<hsize_t> extentsFromType(const std::vector<eT> &v) {
+    std::vector<hsize_t> extents(const ObjectType &v) {
         std::vector<hsize_t> extents(1);
         extents[0] = v.size();
         return extents;
     }
-    static bool matchingExtents(const std::vector<eT> &v, const std::vector<hsize_t> &extents) {
-        if(v.size() == extents[0]) {
-            return true;
-        }
-        return false;
+    ObjectType readFromFile(const std::vector<hsize_t> &extents, Reader &reader) {
+        ObjectType object(extents[0]);
+        reader.read(&object[0]);
+        return object;
     }
-    void* writableBuffer(std::vector<eT>& object) {
-        return &object[0];
-    }
-    const void* readableBuffer(const std::vector<eT>& object) {
-        return &object[0];
+    void writeToFile(const ObjectType &object, Writer& writer) {
+        writer.write(&object[0]);
     }
 };
 

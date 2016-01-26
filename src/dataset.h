@@ -19,6 +19,26 @@
 
 namespace h5cpp {
 
+class DatasetWriter : public Writer
+{
+public:
+    DatasetWriter(Dataset* dataset, hid_t datatype);
+    virtual void write(const void *buffer) override;
+private:
+    Dataset* m_dataset = nullptr;
+    hid_t m_datatype;
+};
+
+class DatasetReader : public Reader
+{
+public:
+    DatasetReader(hid_t dataset, hid_t datatype);
+    virtual void read(void *buffer) override;
+private:
+    hid_t m_dataset;
+    hid_t m_datatype;
+};
+
 class Dataset : public Object
 {
 public:
@@ -57,6 +77,7 @@ private:
     T valueImpl(Object::Requirement mode) const;
 
     friend class Object;
+    friend class DatasetWriter;
 };
 
 #ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
@@ -69,37 +90,23 @@ inline Object::operator Dataset() const {
 template<typename T>
 inline void Object::operator=(const T& matrix)
 {
-    DVLOG(1) << "Assignment operator of T";
-    DVLOG(1) << "Is valid: " << isValid();
-    if(isValid()) {
-        Dataset dataset = *this;
-        dataset = matrix;
-    } else if(m_parentID > 0) {
-        Dataset::create(m_parentID, m_name, matrix);
-    }
+    Dataset dataset = *this;
+    dataset = matrix;
 }
 
 template<typename T>
-Dataset& Dataset::operator=(const T &data)
+Dataset& Dataset::operator=(const T &object)
 {
+    TypeHelper<T> typeHelper;
     DVLOG(1) << "Dataset assignment operator of T type: " << typeid(T).name();
     DVLOG(1) << "Parent, name, id: " << m_parentID << " " << m_name << " " << m_id;
-    bool doesNotExistYet = (m_id == 0 && m_parentID > 0);
-    if(doesNotExistYet) {
-        *this = Dataset::create(m_parentID, m_name, data);
-    } else {
+    bool alreadyExists = (m_id > 0 && m_parentID > 0);
+    if(alreadyExists) {
         if(!isValid()) {
             throw(std::runtime_error("Assigning value to invalid dataset object"));
-            return *this;
         }
-        int targetDimensions = TypeHelper<T>::dimensionCount();
-        std::vector<hsize_t> extent = extents();
-        int currentDimensions = extent.size();
-        bool shouldOverwrite = false;
-        if(currentDimensions != targetDimensions || !TypeHelper<T>::matchingExtents(data, extent)) {
-            shouldOverwrite = true;
-        }
-        if(shouldOverwrite) {
+        std::vector<hsize_t> targetExtents = typeHelper.extents(object);
+        if(!equal(targetExtents.begin(), targetExtents.end(), extents().begin())) {
             DVLOG(1) << "WARNING: Writing over dataset of different shape. "
                      << "Limitations in HDF5 standard makes it impossible to free space taken "
                      << "up by the old dataset.";
@@ -108,16 +115,13 @@ Dataset& Dataset::operator=(const T &data)
             if(deleteError < 0) {
                 throw std::runtime_error("Could not delete old dataset");
             }
-            *this = Dataset::create(m_parentID, m_name, data);
+            *this = Dataset::create(m_parentID, m_name, object);
         } else {
-            DVLOG(1) << "Writing to old dataset";
-            hid_t datatype = TypeHelper<T>::hdfType();
-            TypeHelper<T> temporary;
-            herr_t errors = H5Dwrite(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readableBuffer(data));
-            if(errors < 0) {
-                DVLOG(1) << "Error writing to dataset!";
-            }
+            DatasetWriter writer(this, typeHelper.hdfType());
+            typeHelper.writeToFile(object, writer);
         }
+    } else {
+        *this = Dataset::create(m_parentID, m_name, object);
     }
     return *this;
 }
@@ -125,29 +129,28 @@ Dataset& Dataset::operator=(const T &data)
 template<typename T>
 Dataset Dataset::create(hid_t parentID, const std::string &name, const T &data)
 {
+    TypeHelper<T> typeHelper;
     DVLOG(1) << "Creating dataset on parent " << parentID << " with name " << name;
-    std::vector<hsize_t> extents = TypeHelper<T>::extentsFromType(data);
+    std::vector<hsize_t> extents = typeHelper.extents(data);
 
-    H5S_class_t dataspaceType = TypeHelper<T>::dataspaceType();
+    H5S_class_t dataspaceType = typeHelper.dataspaceType();
     Dataspace dataspace(H5Screate(dataspaceType));
     if(dataspaceType == H5S_SIMPLE) {
         H5Sset_extent_simple(dataspace, extents.size(), &extents[0], NULL);
     }
     hid_t creationParameters = H5Pcreate(H5P_DATASET_CREATE);
-    hid_t datatype = TypeHelper<T>::hdfType();
-    hid_t dataset = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
+    hid_t datatype = typeHelper.hdfType();
+    hid_t datasetID = H5Dcreate(parentID, name.c_str(), datatype, dataspace,
                               H5P_DEFAULT, creationParameters, H5P_DEFAULT);
 
-    if(dataset < 1) {
+    if(datasetID < 1) {
         throw std::runtime_error("Could not create dataset");
     }
-    TypeHelper<T> temporary;
-    herr_t errors = H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.readableBuffer(data));
-    if(errors < 0) {
-        throw std::runtime_error("Could not write dataset");
-    }
+    Dataset dataset(datasetID, parentID, name);
+    DatasetWriter writer(&dataset, datatype);
+    typeHelper.writeToFile(data, writer);
     DVLOG(1) << "Returning the created dataset " << dataset;
-    return Dataset(dataset, parentID, name);
+    return dataset;
 }
 
 template<typename T>
@@ -166,13 +169,14 @@ T Object::value(Requirement mode) const
 template<typename T>
 inline T Dataset::valueImpl(Requirement mode) const
 {
+    TypeHelper<T> typeHelper;
     DVLOG(1) << "Reading dataset " << m_id << " " << m_name << " " << m_parentID << " to type " << demangle(typeid(T).name());
     if(!isValid()) {
         throw(std::runtime_error("Could not fetch value from invalid dataset object"));
     }
     std::vector<hsize_t> extent = extents();
     int datasetDimensionCount = extent.size();
-    int targetDimensionCount = TypeHelper<T>::dimensionCount();
+    int targetDimensionCount = typeHelper.dimensionCount();
     if((mode == Object::Requirement::MatchingDimensionCount && datasetDimensionCount != targetDimensionCount)
             || (mode == Object::Requirement::GreaterThanOrEqualDimensionCount && datasetDimensionCount > targetDimensionCount)) {
         std::stringstream errorStream;
@@ -191,15 +195,9 @@ inline T Dataset::valueImpl(Requirement mode) const
         }
         extent = targetExtents;
     }
-    T object = TypeHelper<T>::objectFromExtents(extent);
-    hid_t datatype = TypeHelper<T>::hdfType();
-    TypeHelper<T> temporary;
-    herr_t readError = H5Dread(m_id, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, temporary.writableBuffer(object));
-    temporary.afterWrite(object);
-    if(readError < 0) {
-        throw std::runtime_error("Could not read dataset");
-    }
-    return object;
+    hid_t datatype = typeHelper.hdfType();
+    DatasetReader reader(m_id, datatype);
+    return typeHelper.readFromFile(extent, reader);
 }
 
 }

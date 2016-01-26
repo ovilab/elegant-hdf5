@@ -92,6 +92,30 @@ Dataset& Dataset::operator=(const Dataset &other)
     return *this;
 }
 
+DatasetWriter::DatasetWriter(Dataset *dataset, hid_t datatype)
+    : Writer()
+    , m_dataset(dataset)
+    , m_datatype(datatype) {}
+
+void DatasetWriter::write(const void *buffer) {
+    herr_t errors = H5Dwrite(m_dataset->m_id, m_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    if(errors < 0) {
+        throw std::runtime_error("Could not write dataset");
+    }
+}
+
+DatasetReader::DatasetReader(hid_t dataset, hid_t datatype)
+    : Reader()
+    , m_dataset(dataset)
+    , m_datatype(datatype) {}
+
+void DatasetReader::read(void *buffer) {
+    herr_t readError = H5Dread(m_dataset, m_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    if(readError < 0) {
+        throw std::runtime_error("Could not read dataset");
+    }
+}
+
 //Dataset& Dataset::operator=(Object &&other)
 //{
 //    Object &otherObject = other;

@@ -16,6 +16,26 @@
 
 namespace h5cpp {
 
+class AttributeReader : public Reader
+{
+public:
+    AttributeReader(hid_t id, hid_t datatype);
+    virtual void read(void *buffer);
+private:
+    hid_t m_id;
+    hid_t m_datatype;
+};
+
+class AttributeWriter : public Writer
+{
+public:
+    AttributeWriter(hid_t id, hid_t datatype);
+    virtual void write(const void *buffer);
+private:
+    hid_t m_id;
+    hid_t m_datatype;
+};
+
 class Attribute
 {
 public:
@@ -95,39 +115,35 @@ inline std::string Attribute::value<std::string>() const
 template<typename T>
 T Attribute::value() const
 {
+    TypeHelper<T> typeHelper;
     DVLOG(1) << "Reading attribute " << m_id << " " << m_name << " " << m_parentID;
     if(m_id == 0) {
         throw std::runtime_error("Attribute does not exist");
     }
-    std::vector<hsize_t> extent = dataspace().extents();
-    int dimensionCount = extent.size();
-    if(dimensionCount != TypeHelper<T>::dimensionCount()) {
+    std::vector<hsize_t> sourceExtents = dataspace().extents();
+    int dimensionCount = sourceExtents.size();
+    if(dimensionCount != typeHelper.dimensionCount()) {
         std::stringstream errorStream;
         errorStream << "Tried to copy dataspace with " << dimensionCount
                     << " dimensions to type " << demangle(typeid(T).name());
         throw std::runtime_error(errorStream.str());
     }
-    T value = TypeHelper<T>::objectFromExtents(extent);
-    hid_t datatype = TypeHelper<T>::hdfType();
-    TypeHelper<T> temporary;
-    herr_t readError = H5Aread(m_id, datatype, temporary.writableBuffer(value));
-    temporary.afterWrite(value);
-    if(readError < 0) {
-        throw std::runtime_error("Could not read attribute");
-    }
-    return value;
+    hid_t datatype = typeHelper.hdfType();
+    AttributeReader reader(m_id, datatype);
+    return typeHelper.readFromFile(sourceExtents, reader);
 }
 
 template<typename T>
-void Attribute::operator=(const T &other)
+void Attribute::operator=(const T &object)
 {
-    hid_t datatype = TypeHelper<T>::hdfType();
-    std::vector<hsize_t> extents = TypeHelper<T>::extentsFromType(other);
+    TypeHelper<T> typeHelper;
+    hid_t datatype = typeHelper.hdfType();
+    std::vector<hsize_t> extents = typeHelper.extents(object);
     if(m_id != 0) {
         close();
         H5Adelete(m_parentID, m_name.c_str());
     }
-    H5S_class_t dataspaceType = TypeHelper<T>::dataspaceType();
+    H5S_class_t dataspaceType = typeHelper.dataspaceType();
     Dataspace dataspace(H5Screate(dataspaceType));
     if(dataspaceType == H5S_SIMPLE) {
         H5Sset_extent_simple(dataspace, extents.size(), &extents[0], NULL);
@@ -136,11 +152,8 @@ void Attribute::operator=(const T &other)
     if(m_id < 1) {
         throw std::runtime_error("Could not create attribute");
     }
-    TypeHelper<T> temporary;
-    herr_t writeError = H5Awrite(m_id, datatype, temporary.readableBuffer(other));
-    if(writeError < 0) {
-        throw std::runtime_error("Could not write attribute");
-    }
+    AttributeWriter writer(m_id, datatype);
+    typeHelper.writeToFile(object, writer);
     DVLOG(1) << "Wrote to attribute " << m_id << " " << m_name << " " << m_parentID;
 }
 
