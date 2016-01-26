@@ -47,3 +47,6 @@ release {
         DEFINES += NDEBUG
     }
 }
+
+DISTFILES += \
+    ../README.md
