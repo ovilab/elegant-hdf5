@@ -62,7 +62,7 @@ int main() {
 
 ## Preliminary installation instructions
 
-*WARNING*: The package is in a very early, experimental stage. 
+**WARNING**: The package is in a very early, experimental stage. 
 In the future, simpler installation and conan packages will be provided. 
 Expect big and sudden API changes in the upcoming releases.
 
