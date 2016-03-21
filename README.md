@@ -1,6 +1,7 @@
 # Elegant HDF5
 
-**WARNING**: Elegant HDF5 is currently in an early stage. 
+**WARNING**: 
+Elegant HDF5 is currently in an early stage.
 Some features are missing and the library should be considered very unstable.
 **Expect big and sudden API changes in the upcoming releases.**
 
