@@ -78,6 +78,8 @@ LD_LIBRARY_PATH=src ./example/example
 
 This should run the example.
 
+### Conan package installation
+
 You may also do a local conan package installation.
 See the [Conan documentation](http://docs.conan.io/en/latest/) for more details.
 
