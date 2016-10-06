@@ -20,15 +20,28 @@ inline Attribute::operator std::string() const
 #endif
 
 template<>
-inline std::string Attribute::value<std::string>() const
+inline std::string Attribute::value<std::string>(Object::ConversionFlags mode) const
 {
+    (void)mode;
     return toString();
 }
 
 template<typename T>
-T Attribute::value() const
+T Attribute::value(Object::ConversionFlags mode) const
 {
+    if(mode == Object::ConversionFlags::InheritedFlags) {
+        mode = m_inheritedConversionFlags;
+    }
+
     TypeHelper<T> typeHelper;
+    hid_t targetDatatype = typeHelper.hdfType();
+    bool requireET = (mode & Object::ConversionFlags::EqualTypes);
+
+    if(requireET && !H5Tequal(typeHelper.hdfType(), H5Aget_type(m_id))) {
+        std::stringstream errorStream;
+        errorStream << "Could not get " << m_name << " because it does not match the requested type";
+        throw std::runtime_error(errorStream.str());
+    }
     DVLOG(1) << "Reading attribute " << m_id << " " << m_name << " " << m_parentID;
     if(m_id == 0) {
         throw std::runtime_error("Attribute does not exist");
@@ -41,8 +54,7 @@ T Attribute::value() const
                     << " dimensions to type " << demangle(typeid(T).name());
         throw std::runtime_error(errorStream.str());
     }
-    hid_t datatype = typeHelper.hdfType();
-    AttributeReader reader(m_id, datatype);
+    AttributeReader reader(m_id, targetDatatype);
     return typeHelper.readFromFile(sourceExtents, reader);
 }
 

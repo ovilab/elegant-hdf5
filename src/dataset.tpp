@@ -96,14 +96,11 @@ T Object::value(ConversionFlags mode) const
 template<typename T>
 inline T Dataset::valueImpl(ConversionFlags mode) const
 {
-    std::cout << "Is mode " << mode << std::endl;
     if(mode == ConversionFlags::InheritedFlags) {
         mode = m_inheritedConversionFlags;
     }
-    std::cout << "Is inhe " << mode << std::endl;
 
     TypeHelper<T> typeHelper;
-
     hid_t targetDatatype = typeHelper.hdfType();
     bool requireET = (mode & Object::ConversionFlags::EqualTypes);
 

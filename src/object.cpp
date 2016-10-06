@@ -276,9 +276,9 @@ Attribute Object::attribute(string key) const
         throw std::runtime_error("Trying to access attribute of invalid object");
     }
     if(!hasAttribute(key)) {
-        return Attribute(0, m_id, key);
+        return Attribute(0, m_id, key, m_inheritedConversionFlags);
     }
-    return Attribute(m_id, key);
+    return Attribute(m_id, key, m_inheritedConversionFlags);
 }
 
 vector<Attribute> Object::attributes() const

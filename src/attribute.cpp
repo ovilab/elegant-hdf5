@@ -10,19 +10,21 @@ Attribute::Attribute()
 {
 }
 
-Attribute::Attribute(hid_t parentID, const std::string &name)
+Attribute::Attribute(hid_t parentID, const std::string &name, Object::ConversionFlags inheritedFlags)
     : m_parentID(parentID)
     , m_name(name)
+    , m_inheritedConversionFlags(inheritedFlags)
 {
     m_id = H5Aopen(parentID, name.c_str(), H5P_DEFAULT);
 
     DVLOG(1) << "Construct attribute by parent and name " << *this;
 }
 
-Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name)
+Attribute::Attribute(hid_t id, hid_t parentID, const std::string &name, Object::ConversionFlags inheritedFlags)
     : m_id(id)
     , m_parentID(parentID)
     , m_name(name)
+    , m_inheritedConversionFlags(inheritedFlags)
 {
     DVLOG(1) << "Creating attribute " << *this;
 }

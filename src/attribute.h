@@ -6,6 +6,7 @@
 #include "utils/demangle.h"
 #include "datatype.h"
 #include "dataspace.h"
+#include "object.h"
 
 #include <hdf5.h>
 #include <ostream>
@@ -42,8 +43,8 @@ class Attribute
 {
 public:
     Attribute();
-    Attribute(hid_t parentID, const std::string &name);
-    Attribute(hid_t id, hid_t parentID, const std::string &name);
+    Attribute(hid_t parentID, const std::string &name, Object::ConversionFlags inheritedFlags);
+    Attribute(hid_t id, hid_t parentID, const std::string &name, Object::ConversionFlags inheritedFlags);
     Attribute(const Attribute &other);
 //    Attribute(Attribute &&other);
 //    Attribute(Attribute &&other) = default;
@@ -72,7 +73,7 @@ public:
     std::vector<hsize_t> extents() const;
 
     template<typename T>
-    T value() const;
+    T value(Object::ConversionFlags mode = Object::ConversionFlags::InheritedFlags) const;
 
     std::string toString() const;
 
@@ -95,6 +96,7 @@ private:
     hid_t m_id = 0;
     hid_t m_parentID = 0;
     std::string m_name;
+    Object::ConversionFlags m_inheritedConversionFlags = Object::ConversionFlags::NoFlags;
 };
 
 } // namespace
