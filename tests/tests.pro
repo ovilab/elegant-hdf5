@@ -9,7 +9,7 @@ INCLUDEPATH += ../libs/Catch/include
 LIBS += -lhdf5_cpp -lhdf5_serial
 
 INCLUDEPATH += ../src
-LIBS += -lelegant_hdf5 -L../src
+LIBS += -L../src -lelegant_hdf5
 
 SOURCES += \
     tests.cpp \

@@ -8,7 +8,6 @@
 namespace elegant {
 namespace hdf5 {
 
-
 class Dataspace
 {
 public:

@@ -1,6 +1,6 @@
 #include "file.h"
-#include "logging.h"
-#include "errorhelper.h"
+#include "utils/logging.h"
+#include "utils/errorhelper.h"
 
 #include <hdf5.h>
 #include <iostream>
@@ -12,8 +12,8 @@ namespace elegant {
 namespace hdf5 {
 
 
-File::File(string fileName, File::OpenMode mode)
-    : Group()
+File::File(string fileName, File::OpenMode mode, ConversionFlags conversionFlags)
+    : Group(conversionFlags)
     , m_fileName(fileName)
 {
     ErrorHelper errorHelper;

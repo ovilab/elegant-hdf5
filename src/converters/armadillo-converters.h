@@ -1,7 +1,7 @@
 #ifndef H5CPP_ARMADILLOCONVERTERS_H
 #define H5CPP_ARMADILLOCONVERTERS_H
 
-#include "../typehelper.h"
+#include "../io/typehelper.h"
 #include "../dataset.h"
 
 #include <armadillo>

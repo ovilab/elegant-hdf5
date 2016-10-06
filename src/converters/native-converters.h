@@ -1,7 +1,7 @@
 #ifndef NATIVECONVERTERS
 #define NATIVECONVERTERS
 
-#include "../typehelper.h"
+#include "../io/typehelper.h"
 
 namespace elegant {
 namespace hdf5 {

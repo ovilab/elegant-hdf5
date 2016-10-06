@@ -4,6 +4,9 @@
 #include <string>
 #include <hdf5.h>
 
+namespace elegant {
+namespace hdf5 {
+
 class ErrorHelper
 {
 public:
@@ -19,5 +22,8 @@ private:
     H5E_auto2_t m_oldFunction;
     void *m_oldClientData;
 };
+
+} // namespace
+} // namespace
 
 #endif // ERRORHELPER_H

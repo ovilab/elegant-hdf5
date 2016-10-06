@@ -1,9 +1,8 @@
 #ifndef TEMP_H
 #define TEMP_H
 
-#include "logging.h"
-#include "demangle.h"
-//#include "dataset.h"
+#include "utils/logging.h"
+#include "utils/demangle.h"
 
 #include <hdf5.h>
 #include <string>
@@ -15,44 +14,14 @@
 namespace elegant {
 namespace hdf5 {
 
-//class Object;
 class Dataset;
 class Group;
 class File;
 class Attribute;
-}
-}
-
-//std::ostream& operator<< (std::ostream &out, const elegant::hdf5::Object &object);
-
-namespace elegant {
-namespace hdf5 {
 
 class Object
 {
 public:
-    Object();
-    Object(hid_t id, hid_t parentID, std::string name);
-
-    enum class CopyMode {
-        OpenOnCopy,
-        DontOpenOnCopy
-    };
-
-    Object(const Object &other, CopyMode mode = CopyMode::OpenOnCopy);
-//    Object(Object &&other);
-//    Object(Dataset &&other) = delete;
-//    Object(Group &&other) = delete;
-    Object& operator=(const Object &other);
-    Object& operator=(const Dataset &other);
-    Object& operator=(const Group &other);
-//    Object& operator=(Object &&other);
-
-    template<typename T>
-    void operator=(const T& other); // TODO: Consider operator chaining support
-
-    virtual ~Object();
-
     enum class Type {
         Invalid = -1,
         File,
@@ -63,22 +32,46 @@ public:
         Attribute
     };
 
-    enum class Requirement {
-        MatchingDimensionCount,
-        GreaterThanOrEqualDimensionCount
+    enum ConversionFlags {
+        NoFlags = 0b00000000,
+        EqualDimensionCount = 0b00000001,
+        GreaterThanOrEqualDimensionCount = 0b00000010,
+        EqualTypes = 0b00000100,
+
+        InheritedFlags = 0b10000000
     };
+
+    Object(ConversionFlags conversionFlags = ConversionFlags::NoFlags);
+    Object(hid_t id, hid_t parentID, std::string name, ConversionFlags inheritedConversionFlags);
+
+    enum class CopyMode {
+        OpenOnCopy,
+        DontOpenOnCopy
+    };
+
+    Object(const Object &other, CopyMode mode = CopyMode::OpenOnCopy);
+    Object& operator=(const Object &other);
+    Object& operator=(const Dataset &other);
+    Object& operator=(const Group &other);
+
+    // TODO implement move operators
+
+    template<typename T>
+    void operator=(const T& other); // TODO: Consider operator chaining support
+
+    virtual ~Object();
 
     const std::string &name() const;
     Type type() const;
     hid_t id() const;
 
-#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
+#ifndef ELEGANT_HDF5_NO_USER_DEFINED_CONVERSION_OPERATORS
     template<typename T>
     operator T() const;
 #endif
 
     template<typename T>
-    T value(Requirement mode = Requirement::MatchingDimensionCount) const;
+    T value(ConversionFlags mode = ConversionFlags::InheritedFlags) const;
 
     bool isValid() const;
     bool isDataset() const;
@@ -103,65 +96,16 @@ protected:
     void constructFromOther(const Object &other);
 
     hid_t m_id = 0;
-    hid_t m_parentID = 0;
+    hid_t m_parentId = 0;
     std::string m_name;
+    ConversionFlags m_inheritedConversionFlags = ConversionFlags::NoFlags;
 
 private:
 };
 
-#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
-template<typename T>
-Object::operator T() const
-{
-    return value<T>();
-}
-#endif
-
-template<typename T>
-inline T& operator<<(T &other, const elegant::hdf5::Object &object)
-{
-    other = object.value<T>();
-    return other;
-}
-
-template<typename T>
-inline T& operator>>(const elegant::hdf5::Object &object, T &other)
-{
-    other = object.value<T>();
-    return other;
-}
-
-inline std::ostream& operator<< (std::ostream &out, const elegant::hdf5::Object &object)
-{
-    std::string typeName = "Unknown";
-    elegant::hdf5::Object::Type type = object.type();
-    switch(type) {
-    case elegant::hdf5::Object::Type::File:
-        typeName = "File";
-        break;
-    case elegant::hdf5::Object::Type::Group:
-        typeName = "Group";
-        break;
-    case elegant::hdf5::Object::Type::Datatype:
-        typeName = "Datatype";
-        break;
-    case elegant::hdf5::Object::Type::Dataspace:
-        typeName = "Dataspace";
-        break;
-    case elegant::hdf5::Object::Type::Dataset:
-        typeName = "Dataset";
-        break;
-    case elegant::hdf5::Object::Type::Attribute:
-        typeName = "Attribute";
-        break;
-    default:
-        break;
-    }
-    out << "Object(type=" << typeName << ", id=" << object.id() << ", name=\"" << object.name() << "\")";
-    return out;
-}
-
 } // namespace h5cpp
 }
+
+#include "object.tpp"
 
 #endif // TEMP_H

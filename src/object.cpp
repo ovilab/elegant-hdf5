@@ -2,26 +2,28 @@
 
 #include "dataset.h"
 #include "group.h"
-#include "typehelper.h"
+#include "io/typehelper.h"
 
 using namespace std;
 
 namespace elegant {
 namespace hdf5 {
 
-Object::Object()
+Object::Object(ConversionFlags conversionFlags)
+    : m_inheritedConversionFlags(conversionFlags)
 {
 }
 
-Object::Object(hid_t id, hid_t parentID, string name)
+Object::Object(hid_t id, hid_t parentID, string name, ConversionFlags inheritedConversionFlags)
     : m_id(id)
-    , m_parentID(parentID)
+    , m_parentId(parentID)
     , m_name(name)
+    , m_inheritedConversionFlags(inheritedConversionFlags)
 {
 }
 
 Object::Object(const Object &other, Object::CopyMode mode)
-    : m_parentID(other.parentID())
+    : m_parentId(other.parentID())
     , m_name(other.name())
 {
     if(mode == CopyMode::OpenOnCopy) {
@@ -63,21 +65,21 @@ Object &Object::operator=(const Object &other)
     bool copyFromExistingToExisting = isValid() && other.isValid();
     bool copyFromExistingToNonExisting = isNonExistingNamed() && other.isValid();
 
-    bool isSame = (m_name == other.name() && m_parentID == other.parentID());
+    bool isSame = (m_name == other.name() && m_parentId == other.parentID());
     if(isSame) {
         DVLOG(1) << "Is the same object";
         return *this;
     } else if(copyFromExistingToExisting || copyFromExistingToNonExisting) {
         close();
         if(copyFromExistingToExisting) {
-            H5Ldelete(m_parentID, m_name.c_str(), H5P_DEFAULT);
+            H5Ldelete(m_parentId, m_name.c_str(), H5P_DEFAULT);
         }
         herr_t error = H5Ocopy(other.parentID(), other.name().c_str(),
-                m_parentID, m_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
+                m_parentId, m_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
         if(error < 0) {
             throw runtime_error("Could not copy object from other");
         }
-        m_id = H5Oopen(m_parentID, m_name.c_str(), H5P_DEFAULT);
+        m_id = H5Oopen(m_parentId, m_name.c_str(), H5P_DEFAULT);
         if(m_id < 1) {
             throw runtime_error("Could not open object");
         }
@@ -114,8 +116,9 @@ void Object::constructFromOther(const Object &other)
         m_id = other.id();
         DVLOG(1) << "Copied other " << m_id;
     }
-    m_name = other.name();
-    m_parentID = other.parentID();
+    m_name = other.m_name;
+    m_parentId = other.m_parentId;
+    m_inheritedConversionFlags = other.m_inheritedConversionFlags;
 }
 
 void Object::close()
@@ -162,7 +165,7 @@ bool Object::isValid() const
         }
         return true;
     }
-    if(m_id == 0 || m_name.empty() || m_parentID == 0) {
+    if(m_id == 0 || m_name.empty() || m_parentId == 0) {
         return false;
     }
     return true;
@@ -180,7 +183,7 @@ bool Object::isGroup() const
 
 bool Object::isNonExistingNamed() const
 {
-    return (!isValid() && !m_name.empty() && m_parentID > 0);
+    return (!isValid() && !m_name.empty() && m_parentId > 0);
 }
 
 Object::Type Object::fromHdf5Type(H5I_type_t hType) {
@@ -239,7 +242,7 @@ H5I_type_t Object::toHdf5Type(Object::Type hType) {
 
 hid_t Object::parentID() const
 {
-    return m_parentID;
+    return m_parentId;
 }
 
 vector<string> Object::attributeKeys() const

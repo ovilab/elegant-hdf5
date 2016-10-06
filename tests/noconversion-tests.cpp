@@ -1,6 +1,6 @@
 #include <catch.hpp>
 
-#define H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
+#define ELEGANT_HDF5_NO_USER_DEFINED_CONVERSION_OPERATORS
 #include <elegant/hdf5/hdf5>
 #include <armadillo>
 

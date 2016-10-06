@@ -1,4 +1,5 @@
 #include "dataset.h"
+#include "dataset_p.h"
 
 #include <iostream>
 
@@ -12,11 +13,6 @@ Dataset::Dataset()
     : Object()
 {
 }
-
-//Dataset::Dataset(Dataset &&other)
-//    : Object(move(other))
-//{
-//}
 
 Dataset::~Dataset()
 {
@@ -62,7 +58,7 @@ int Dataset::dimensionCount() const
 }
 
 Dataset::Dataset(hid_t id, hid_t parentID, string name)
-    : Object(id, parentID, name)
+    : Object(id, parentID, name, m_inheritedConversionFlags)
 {
 }
 
@@ -117,51 +113,6 @@ void DatasetReader::read(void *buffer) {
         throw std::runtime_error("Could not read dataset");
     }
 }
-
-//Dataset& Dataset::operator=(Object &&other)
-//{
-//    Object &otherObject = other;
-//    Object::operator=(move(otherObject));
-//    return *this;
-//}
-
-//Dataset& Dataset::operator=(Dataset &&other)
-//{
-//    Object &otherObject = other;
-//    Object::operator=(move(otherObject));
-//    return *this;
-//}
-
-//void Dataset::constructFromOther(const Object &other)
-//{
-//    if(other.isValid() && other.isDataset()) {
-//        close();
-//        m_id = H5Dopen(other.id(), ".", H5P_DEFAULT);
-//#ifdef H5CPP_VERBOSE
-//        DVLOG(1) << "Opened dataset " << m_id << " from other " << other.id();
-//#endif
-//        m_name = other.name();
-//        m_parentID = other.parentID();
-//    } else if(other.id() == 0) {
-//        close();
-//        m_id = other.id();
-//        m_name = other.name();
-//        m_parentID = other.parentID();
-//    } else {
-//        DVLOG(1) << "ERROR: Cannot construct Dataset from " << other;
-//    }
-//}
-
-//void Dataset::close()
-//{
-//    if(m_id > 0) {
-//#ifdef H5CPP_VERBOSE
-//    DVLOG(1) << "Closing dataset " << m_id;
-//#endif
-//        H5Dclose(m_id);
-//        m_id = 0;
-//    }
-//}
 
 }
 }

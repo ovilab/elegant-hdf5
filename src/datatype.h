@@ -6,7 +6,6 @@
 namespace elegant {
 namespace hdf5 {
 
-
 class Datatype
 {
 public:

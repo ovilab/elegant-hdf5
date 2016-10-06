@@ -1,7 +1,7 @@
 #ifndef GROUP_H
 #define GROUP_H
 
-#include "logging.h"
+#include "utils/logging.h"
 #include "attribute.h"
 #include "dataset.h"
 #include "object.h"
@@ -14,11 +14,10 @@
 namespace elegant {
 namespace hdf5 {
 
-
 class Group : public Object
 {
 public:
-    Group();
+    Group(ConversionFlags conversionFlags = ConversionFlags::NoFlags);
     Group(const Object &other);
     Group(const Group &other);
 //    Group(Group &&other);
@@ -43,7 +42,7 @@ private:
     Group(hid_t id, hid_t parentID, std::string name);
 };
 
-#ifndef H5CPP_NO_USER_DEFINED_CONVERSION_OPERATORS
+#ifndef ELEGANT_HDF5_NO_USER_DEFINED_CONVERSION_OPERATORS
 template<>
 inline Object::operator Group() const {
     return Group(*this);

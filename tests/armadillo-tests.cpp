@@ -40,14 +40,14 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
                 mat mar;
                 mar = file["my_mat"].value<mat>();
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
-                mar << file["my_mat"];
+                file["my_mat"] >> mar;
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
                 file["my_mat"] >> mar;
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
                 Dataset ds = file["my_mat"];
                 mar = ds.value<mat>();
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
-                mar << ds;
+                ds >> mar;
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
                 ds >> mar;
                 REQUIRE(0 == Approx(max(max(abs(ma - mar)))));
@@ -106,7 +106,7 @@ SCENARIO("Reading and writing armadillo objects", "[armadillo]") {
             double scalar = 85.4;
             file["my_scalar"] = scalar;
             THEN("the same should be read back to a cube") {
-                cube cr = file["my_scalar"].value<cube>(Object::Requirement::GreaterThanOrEqualDimensionCount);
+                cube cr = file["my_scalar"].value<cube>(Object::ConversionFlags::GreaterThanOrEqualDimensionCount);
                 REQUIRE(cr(0, 0, 0) == scalar);
             }
         }

@@ -1,6 +1,9 @@
-#include "errorhelper.h"
+#include "utils/errorhelper.h"
 #include <sstream>
 #include <iomanip>
+
+namespace elegant {
+namespace hdf5 {
 
 using namespace std;
 
@@ -37,3 +40,6 @@ herr_t ErrorHelper::streamBuilder(unsigned n, const H5E_error2_t *error, void *c
     herr_t result = 0;
     return result;
 }
+
+} // namespace
+} // namespace

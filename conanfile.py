@@ -5,8 +5,8 @@ class H5CppConan(ConanFile):
     name = "h5cpp"
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
-    exports = "h5cpp.pro", "src/*", "tests/*", "libs/*", ".qmake.conf", "library_deployment.pri"
-    url = "http://github.com/dragly/h5cpp"
+    exports = "elegant-hdf5.pro", "src/*", "tests/*", "libs/*", ".qmake.conf", "library_deployment.pri"
+    url = "http://github.com/ovilab/elegant-hdf5"
     license = "gplv3"
 
     def build(self):
@@ -14,7 +14,7 @@ class H5CppConan(ConanFile):
         print cmake.command_line
         print cmake.build_config
         self.run('mkdir build')
-        self.run('cd build && qmake ../h5cpp.pro CONFIG+=notests')
+        self.run('cd build && qmake ../elegant-hdf5.pro CONFIG+=notests')
         self.run("cd build && make -j4")
 
     def package(self):
@@ -24,4 +24,4 @@ class H5CppConan(ConanFile):
         # self.copy("*.a", dst="lib", src="hello/lib")
 
     def package_info(self):
-        self.cpp_info.libs = ["h5cpp"]
+        self.cpp_info.libs = ["elegant_hdf5"]

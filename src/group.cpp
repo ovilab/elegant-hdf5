@@ -14,8 +14,8 @@ namespace elegant {
 namespace hdf5 {
 
 
-Group::Group()
-    : Object()
+Group::Group(ConversionFlags conversionFlags)
+    : Object(conversionFlags)
 {
 }
 
@@ -63,7 +63,7 @@ Group& Group::operator=(const Group &other)
 //}
 
 Group::Group(hid_t id, hid_t parentID, string name)
-    : Object(id, parentID, name)
+    : Object(id, parentID, name, m_inheritedConversionFlags)
 {
 }
 
@@ -106,11 +106,11 @@ Object Group::item(string key) const
         throw(std::runtime_error("Requested key from from invalid group object"));
     }
     if(!hasKey(key)) {
-        return Object(0, m_id, key);
+        return Object(0, m_id, key, m_inheritedConversionFlags);
     }
     hid_t id = H5Oopen(m_id, key.c_str(), H5P_DEFAULT);
     DVLOG(1) << "Open object " << key << " as " << id;
-    return Object(id, m_id, key);
+    return Object(id, m_id, key, m_inheritedConversionFlags);
 }
 
 Object Group::operator[](string key) const
