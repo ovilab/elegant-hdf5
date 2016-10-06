@@ -1,7 +1,9 @@
 # Elegant HDF5
 
-**Note**: Elegant HDF5 is currently in an early stage. 
+**WARNING**: 
+Elegant HDF5 is currently in an early stage.
 Some features are missing and the library should be considered very unstable.
+**Expect big and sudden API changes in the upcoming releases.**
 
 Elegant HDF5 is a C++ library for HDF5 files with usability in mind.
 One design goal of the library is to be forgiving.
@@ -65,6 +67,59 @@ int main() {
     return 0;
 }
 ```
+
+## Preliminary installation instructions
+
+**WARNING**: The package is in a very early, experimental stage. 
+In the future, simpler installation and conan packages will be provided. 
+Expect big and sudden API changes in the upcoming releases.
+
+To test the example on Ubuntu, do the following:
+
+```
+sudo apt-get install catch libhdf5-dev qmake
+git clone https://github.com/ovilab/elegant-hdf5.git
+cd elegant-hdf5
+qmake
+make
+LD_LIBRARY_PATH=src ./example/example
+```
+
+This should run the example.
+
+### Conan package installation
+
+You may also do a local conan package installation.
+See the [Conan documentation](http://docs.conan.io/en/latest/) for more details.
+
+In short, what you need to do is the following:
+
+```
+sudo apt-get install catch libhdf5-dev qmake
+git clone https://github.com/ovilab/elegant-hdf5.git
+cd elegant-hdf5
+conan export dragly/master
+```
+
+In your project's folder add a file named conanfile.txt:
+
+```
+[requires]
+h5cpp/0.1@dragly/master
+
+[generators]
+qmake
+cmake
+qbs
+```
+
+Then run the following command to generate the conanbuildinfo files:
+
+```
+conan install --build
+```
+
+Then you may add the conanbuildinfo file of your choice depending on your build platform.
 
 ## Support for matrix libraries
 
