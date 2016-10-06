@@ -16,53 +16,59 @@ Here's a piece of code that illustrates the use of Elegant HDF5 with Armadillo:
 
 ```cpp
 #include <armadillo>
-#include <elegant/hdf5>
+#include <algorithm>
+
+#include "../src/attribute.h"
+#include "../src/file.h"
 
 using namespace elegant::hdf5;
 using namespace std;
 using namespace arma;
 
 int main() {
-    File myFile("myfile.h5");
+    File results("results.h5");
 
     // Writing simple types
-    myFile["my_double"] = 12.0;
-    myFile["my_int"] = 5.2;
+    results["coffee_consumed"] = 12.4;
+    results["meeting_hours"] = 5.2;
 
     // Reading simple types
-    int myInt = myFile["my_int"];
-    double myDouble = myFile["my_double"];
-    cout << "my_int: " << myInt << ", my_double: " << myDouble << endl;
+    double meetingHours = results["meeting_hours"];
+    double coffeeConsumed = results["coffee_consumed"];
+    cout << "meeting_hours: " << meetingHours << endl << "coffee_consumed: " << coffeeConsumed << endl;
 
-    // Type conversion
-    int myDoubleAsInt = myFile["my_double"];
-    cout << "my_double: " << myDoubleAsInt << endl;
+    // Implicit type conversion (can be disabled)
+    int coffeeConsumedAsInt = results["coffee_consumed"];
+    cout << "coffee_consumed: " << coffeeConsumedAsInt << endl;
 
     // std::vector support
-    vector<double> myVector(100);
-    std::fill(myVector.begin(), myVector.end(), 123.0);
-    myFile["my_vector"] = myVector;
+    vector<double> sleepHoursPerDay = {5.4, 7.8, 9.2, 6.8, 7.5, 8.6};
+    results["sleep_hours_per_day"] = sleepHoursPerDay;
 
     // Writing Armadillo objects
-    mat a = ones(2, 3);
-    myFile["my_dataset"] = a;
-    mat b = myFile["my_dataset"];
-    cout << b << endl;
+    mat a = {{2.3, 9.2, 1.0},
+             {4.5, 2.4, 8.9}};
+    results["travel_distances"] = a;
+
+    // Reading Armadillo objects
+    mat b = results["travel_distances"];
+    cout << "Travel distances:" << endl << b << endl;
 
     // Support for attributes
-    myFile.attribute("my_attribute") = std::string("My attribute information");
-    myFile.attribute("my_numeric_attribute") = 45.2;
+    results.attribute("address") = std::string("Karl Johans gate");
+    results.attribute("average_oxygen_pressure") = 45.2;
 
     // Support for groups
-    Group myGroup;
-    if(myFile.hasKey("my_group")) {
-        myGroup = myFile["my_group"];
+    Group cars;
+    if(results.hasKey("cars")) {
+        cars = results["cars"];
     } else {
-        myGroup = myFile.createGroup("my_group");
+        cars = results.createGroup("cars");
     }
-    myGroup.attribute("my_group_attribute") = 12.4;
-    double myGroupAttribute = myGroup.attribute("my_group_attribute");
-    cout << myGroupAttribute << endl;
+    cars.attribute("batmobile_weight") = 7912.34;
+
+    double batmobileWeight = cars.attribute("batmobile_weight");
+    cout << "Batmobile weight: " << batmobileWeight << endl;
 
     return 0;
 }

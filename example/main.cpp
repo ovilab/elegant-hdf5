@@ -20,9 +20,9 @@ int main() {
     double coffeeConsumed = results["coffee_consumed"];
     cout << "meeting_hours: " << meetingHours << endl << "coffee_consumed: " << coffeeConsumed << endl;
 
-    // Type conversion
-//    int coffeeConsumedAsInt = results["coffee_consumed"];
-//    cout << "coffee_consumed: " << coffeeConsumedAsInt << endl;
+    // Implicit type conversion (can be disabled)
+    int coffeeConsumedAsInt = results["coffee_consumed"];
+    cout << "coffee_consumed: " << coffeeConsumedAsInt << endl;
 
     // std::vector support
     vector<double> sleepHoursPerDay = {5.4, 7.8, 9.2, 6.8, 7.5, 8.6};
